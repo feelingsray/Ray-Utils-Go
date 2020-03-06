@@ -11,12 +11,31 @@ import (
 /*
  * 数组反转
  */
-func ArrayReverse(s []interface{}) []interface{} {
+func ReverseInterfaceArrary(s []interface{}) []interface{} {
 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 		s[i], s[j] = s[j], s[i]
 	}
 	return s
 }
+func ReverseInts(s []int) []int {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+	return s
+}
+func ReverseStrings(s []string) []string {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+	return s
+}
+func ReverseFloats(s []float64) []float64 {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+	return s
+}
+
 
 func Substr(str string, start, length int) string {
 	if length == 0 {

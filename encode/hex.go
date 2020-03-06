@@ -1,6 +1,8 @@
 package encode
 
 import (
+	"bytes"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 )
@@ -23,4 +25,17 @@ func HexStringToByte(src string) ([]byte,error){
 func ByteToHexString(src []byte) string {
 	dst := hex.EncodeToString(src)
 	return dst
+}
+
+/*
+ * Bytes 转 Int
+ */
+func BytesToInt(bys []byte) (int,error) {
+	bytebuff := bytes.NewBuffer(bys)
+	var data int64
+	err := binary.Read(bytebuff, binary.BigEndian, &data)
+	if err != nil {
+		return 0,err
+	}
+	return int(data),nil
 }
