@@ -1,0 +1,7 @@
+# 自动升级配置
+
+name: "demo"
+remote: "127.0.0.1:9091"
+auto: true  # 如果true则自动升级,如果false仅下载
+install: true # 是否自动安装
+source: ""   # 源目录,绝对路径,用于存放下载的文件包

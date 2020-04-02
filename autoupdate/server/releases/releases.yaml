@@ -1,0 +1,8 @@
+# 软件说明
+
+- name: "demo"
+  description: "测试软件"
+  latest: "1.0.0"
+  previous:
+    - version: "1.0.0"
+      md5: "adcdd5003435e3b24969d660a808c84d"
