@@ -12,30 +12,38 @@ import (
 type MqttHelper struct {
 	Host      string
 	Port      int
+	ClientId  string
+	CleanSession bool
 	UserName  string
 	Password  string
 	TopicList map[string]byte
 	TimeOut   int
 	KeepAlive int
-	Logger    *logrus.Entry
+	ClientOptions *mqtt.ClientOptions
 }
 
-func NewMqttHelper(host string, username string, password string, logger *logrus.Entry) *MqttHelper {
+func NewMqttHelper(host string, username string, password string, clientId string, cleanSession bool) *MqttHelper {
 	mh := MqttHelper{}
+	mh.ClientId = clientId
+	mh.CleanSession = cleanSession
 	mh.UserName = username
 	mh.Password = password
 	mh.Host = host
 	mh.Port = 1883
 	mh.TimeOut = 3
 	mh.KeepAlive = 60
-	mh.Logger = logger
 	return &mh
 }
 
-func (m *MqttHelper) Connect(topics map[string]byte, f mqtt.MessageHandler) mqtt.Client {
+func (m *MqttHelper) Connect(topics map[string]byte, f mqtt.MessageHandler) (mqtt.Client,error) {
 	opts := mqtt.NewClientOptions().AddBroker(fmt.Sprintf("tcp://%s:%d", m.Host, m.Port))
-	opts.SetClientID(uuid.NewV1().String())
+	clientId := m.ClientId
+	if clientId == ""{
+		clientId = uuid.NewV1().String()
+	}
+	opts.SetClientID(clientId)
 	opts.SetAutoReconnect(true)
+	opts.SetCleanSession(m.CleanSession)
 	opts.SetUsername(m.UserName)
 	opts.SetPassword(m.Password)
 	opts.SetConnectTimeout(time.Duration(m.TimeOut) * time.Second)
@@ -43,46 +51,40 @@ func (m *MqttHelper) Connect(topics map[string]byte, f mqtt.MessageHandler) mqtt
 	opts.SetConnectionLostHandler(m.onConnectionLost)
 	opts.SetDefaultPublishHandler(f)
 	opts.SetKeepAlive(time.Duration(m.KeepAlive) * time.Minute)
+	m.ClientOptions = opts
 	mc := mqtt.NewClient(opts)
 	m.TopicList = topics
 	token := mc.Connect()
 	if token.Error() != nil {
-		m.Logger.WithFields(logrus.Fields{
-			"model": "mqtt",
-		}).Error(token.Error())
-		return nil
+		return nil,token.Error()
 	} else {
-		m.Logger.WithFields(logrus.Fields{
-			"model": "mqtt",
-		}).Infof("mqtt connect success:tcp://%s:%d", m.Host, m.Port)
-		return mc
+		return mc,nil
 	}
 }
 
-func (m *MqttHelper) ConnectForPublish() mqtt.Client {
+func (m *MqttHelper) ConnectForPublish() (mqtt.Client,error) {
 	opts := mqtt.NewClientOptions().AddBroker(fmt.Sprintf("tcp://%s:%d", m.Host, m.Port))
-	opts.SetClientID(uuid.NewV1().String())
+	clientId := m.ClientId
+	if clientId == ""{
+		clientId = uuid.NewV1().String()
+	}
+	opts.SetClientID(clientId)
 	opts.SetUsername(m.UserName)
 	opts.SetPassword(m.Password)
+	m.ClientOptions = opts
 	c := mqtt.NewClient(opts)
 	if token := c.Connect(); token.Wait() && token.Error() != nil {
-		m.Logger.WithFields(logrus.Fields{
-			"model": "mqtt",
-		}).Error(token.Error())
-		return nil
+		return nil,token.Error()
 	}
-	return c
+	return c,nil
 }
 
-func (m *MqttHelper) Publish(client mqtt.Client, topic string, qos byte, retained bool, payload interface{}) bool {
+func (m *MqttHelper) Publish(client mqtt.Client, topic string, qos byte, retained bool, payload interface{}) (bool,error) {
 	token := client.Publish(topic, qos, retained, payload)
 	if token.Wait() && token.Error() != nil {
-		m.Logger.WithFields(logrus.Fields{
-			"model": "mqtt",
-		}).Error(token.Error())
-		return false
+		return false,token.Error()
 	}
-	return true
+	return true,nil
 }
 
 func (m *MqttHelper) onConnect(client mqtt.Client) {
