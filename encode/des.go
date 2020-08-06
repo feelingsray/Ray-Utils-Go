@@ -1,36 +1,25 @@
 package encode
 
 import (
-	"bytes"
 	"crypto/des"
-	"encoding/hex"
 	"errors"
 )
 
-func ZeroPadding(ciphertext []byte, blockSize int) []byte {
-	padding := blockSize - len(ciphertext)%blockSize
-	padtext := bytes.Repeat([]byte{0}, padding)
-	return append(ciphertext, padtext...)
-}
 
-func ZeroUnPadding(origData []byte) []byte {
-	return bytes.TrimFunc(origData,
-		func(r rune) bool {
-			return r == rune(0)
-		})
-}
+/*
+ * DES/ECB/PKCS5Padding
+ */
 
 
-func Encrypt(text string, key []byte) (string, error) {
-	src := []byte(text)
+func DESEncrypt(src, key []byte) ([]byte, error) {
 	block, err := des.NewCipher(key)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	bs := block.BlockSize()
-	src = ZeroPadding(src, bs)
-	if len(src)%bs != 0 {
-		return "", errors.New("Need a multiple of the blocksize")
+	src = PKCS5Padding(src, bs)
+	if len(src) % bs != 0 {
+		return nil, errors.New("Need a multiple of the blocksize")
 	}
 	out := make([]byte, len(src))
 	dst := out
@@ -39,29 +28,25 @@ func Encrypt(text string, key []byte) (string, error) {
 		src = src[bs:]
 		dst = dst[bs:]
 	}
-	return hex.EncodeToString(out), nil
+	return out, nil
 }
 
-func Decrypt(decrypted string , key []byte) (string, error) {
-	src, err := hex.DecodeString(decrypted)
-	if err != nil {
-		return "", err
-	}
+func DESDecrypt(src, key []byte) ([]byte, error) {
 	block, err := des.NewCipher(key)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	out := make([]byte, len(src))
 	dst := out
 	bs := block.BlockSize()
-	if len(src)%bs != 0 {
-		return "", errors.New("crypto/cipher: input not full blocks")
+	if len(src) % bs != 0 {
+		return nil, errors.New("crypto/cipher: input not full blocks")
 	}
 	for len(src) > 0 {
 		block.Decrypt(dst, src[:bs])
 		src = src[bs:]
 		dst = dst[bs:]
 	}
-	out = ZeroUnPadding(out)
-	return string(out), nil
+	out = PKCS5UnPadding(out)
+	return out, nil
 }

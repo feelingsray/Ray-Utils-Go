@@ -1,64 +1,58 @@
 package encode
 
 import (
-	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/base64"
 )
 
-func AesEncrypt(orig string, key string) string {
-	// 转成字节数组
-	origData := []byte(orig)
-	k := []byte(key)
 
-	// 分组秘钥
-	block, _ := aes.NewCipher(k)
-	// 获取秘钥块的长度
-	blockSize := block.BlockSize()
-	// 补全码
-	origData = PKCS7Padding(origData, blockSize)
-	// 加密模式
-	blockMode := cipher.NewCBCEncrypter(block, k[:blockSize])
-	// 创建数组
-	cryted := make([]byte, len(origData))
-	// 加密
-	blockMode.CryptBlocks(cryted, origData)
-
-	return base64.StdEncoding.EncodeToString(cryted)
-
+/*
+ * AES/CBC/PKCS5Padding
+ */
+type AESCryptor struct {
+	Key []byte
+	IV  []byte
 }
 
-func AesDecrypt(cryted string, key string) string {
-	// 转成字节数组
-	crytedByte, _ := base64.StdEncoding.DecodeString(cryted)
-	k := []byte(key)
-
-	// 分组秘钥
-	block, _ := aes.NewCipher(k)
-	// 获取秘钥块的长度
-	blockSize := block.BlockSize()
-	// 加密模式
-	blockMode := cipher.NewCBCDecrypter(block, k[:blockSize])
-	// 创建数组
-	orig := make([]byte, len(crytedByte))
-	// 解密
-	blockMode.CryptBlocks(orig, crytedByte)
-	// 去补全码
-	orig = PKCS7UnPadding(orig)
-	return string(orig)
+func NewAESCryptor(key,iv string) *AESCryptor {
+	k,_ := base64.StdEncoding.DecodeString(key)
+	v, _ := base64.StdEncoding.DecodeString(iv)
+	return &AESCryptor{
+		Key:k,
+		IV:v,
+	}
 }
 
-//补码
-func PKCS7Padding(ciphertext []byte, blocksize int) []byte {
-	padding := blocksize - len(ciphertext)%blocksize
-	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(ciphertext, padtext...)
+func (a *AESCryptor)AESBase64Encrypt(data string) (string,error){
+	iv := []byte(a.IV)
+	key := []byte(a.Key)
+	var block cipher.Block
+	block, err := aes.NewCipher(key)
+	if err != nil{
+		return "",err
+	}
+	encrypt := cipher.NewCBCEncrypter(block, iv)
+	source := PKCS5Padding([]byte(data), block.BlockSize())
+	dst := make([]byte, len(source))
+	encrypt.CryptBlocks(dst, source)
+	return base64.RawStdEncoding.EncodeToString(dst),nil
 }
 
-//去码
-func PKCS7UnPadding(origData []byte) []byte {
-	length := len(origData)
-	unpadding := int(origData[length-1])
-	return origData[:(length - unpadding)]
+func (a *AESCryptor)AESBase64Decrypt(data string) (string,error){
+	iv := []byte(a.IV)
+	key := []byte(a.Key)
+	var block cipher.Block
+	block, err := aes.NewCipher([]byte(key))
+	if err != nil{
+		return "",err
+	}
+	encrypt := cipher.NewCBCDecrypter(block, iv)
+	var source [] byte
+	if source, err = base64.RawStdEncoding.DecodeString(data);err != nil{
+		return "",err
+	}
+	dst := make([]byte, len(source))
+	encrypt.CryptBlocks(dst, source)
+	return string(PKCS5UnPadding(dst)),nil
 }
