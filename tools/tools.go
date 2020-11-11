@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"fmt"
 	uuid "github.com/satori/go.uuid"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -100,5 +101,23 @@ func AutoShortStr(len int) string {
 		lHexLong >>= 5
 	}
 	return outChars
+}
+
+//查找对象是否在字符串内
+func ObjectInArray(obj interface{}, target interface{}) bool {
+	targetValue := reflect.ValueOf(target)
+	switch reflect.TypeOf(target).Kind() {
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < targetValue.Len(); i++ {
+			if targetValue.Index(i).Interface() == obj {
+				return true
+			}
+		}
+	case reflect.Map:
+		if targetValue.MapIndex(reflect.ValueOf(obj)).IsValid() {
+			return true
+		}
+	}
+	return false
 }
 
