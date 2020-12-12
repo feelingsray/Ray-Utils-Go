@@ -121,3 +121,13 @@ func ObjectInArray(obj interface{}, target interface{}) bool {
 	return false
 }
 
+// 字符串数组中包含字符串
+func StringsContains(obj string,list []string) bool {
+	for _,v := range list{
+		if v == obj {
+			return true
+		}
+	}
+	return false
+}
+
