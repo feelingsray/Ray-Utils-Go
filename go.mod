@@ -1,6 +1,6 @@
 module github.com/feelingsray/Ray-Utils-Go
 
-go 1.13
+go 1.17
 
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
@@ -19,4 +19,9 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/yaml.v2 v2.2.8
+)
+
+require (
+	github.com/konsorten/go-windows-terminal-sequences v1.0.1 // indirect
+	golang.org/x/crypto v0.0.0-20191219195013-becbf705a915 // indirect
 )

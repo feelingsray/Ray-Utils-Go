@@ -12,9 +12,12 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+*/vendor/*
+vendor/*
 
 .idea/*
 */.idea/*
 *.DS_Store
 autoupdate/client/release/demo/release_1.0.0/._install.sh
+
+vendor
