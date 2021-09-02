@@ -11,7 +11,7 @@ require (
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.8.1
-	github.com/tjfoc/gmsm v1.4.1
+	github.com/tjfoc/gmsm v1.3.2
 	github.com/weekface/mgorus v0.0.0-20181029072001-239539fe10e4
 	golang.org/x/net v0.0.0-20201010224723-4f7140c49acb // indirect
 	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68 // indirect
