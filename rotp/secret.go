@@ -57,16 +57,16 @@ var secret  = []string{
 }
 
 
-func RTOTPVerify(code string) bool {
+func RTOTPVerify(code string) (bool,string) {
     //fmt.Println(len(secret))
     for _,s := range secret {
         mySecret := fmt.Sprintf("ray%s1989%s02",s[:4],s[4:])
         //fmt.Println(mySecret)
         if NewTOTP([]byte(mySecret),6,30).Verify(code) {
-            return true
+            return true,s
         }
     }
-    return false
+    return false,""
 }
 
 func RTOTPCode(secret string) string {
