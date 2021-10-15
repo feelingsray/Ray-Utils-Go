@@ -3,6 +3,7 @@ package rotp
 import (
     "fmt"
     "time"
+    "github.com/xlzd/gotp"
 )
 
 var secret  = []string{
@@ -65,7 +66,8 @@ func RTOTPVerify(code string) (bool,string) {
     for _,s := range secret {
         mySecret := fmt.Sprintf("ray%s1989%s02",s[:4],s[4:])
         //fmt.Println(mySecret)
-        if NewTOTP([]byte(mySecret),6,30).Verify(code) {
+        totp := gotp.NewTOTP(mySecret, 6, 30, nil)
+        if totp.Verify(code,int(time.Now().Unix())) {
             return true,s
         }
     }
@@ -75,7 +77,8 @@ func RTOTPVerify(code string) (bool,string) {
 func RTOTPVerifyWithTime(code string,dt time.Time) (bool,string) {
     for _,s := range secret {
         mySecret := fmt.Sprintf("ray%s1989%s02",s[:4],s[4:])
-        if NewTOTP([]byte(mySecret),6,30).VerifyWithTime(code,dt) {
+        totp := gotp.NewTOTP(mySecret, 6, 30, nil)
+        if totp.Verify(code,int(dt.Unix())) {
             return true,s
         }
     }
@@ -84,10 +87,10 @@ func RTOTPVerifyWithTime(code string,dt time.Time) (bool,string) {
 
 func RTOTPCode(secret string) string {
     mySecret := fmt.Sprintf("ray%s1989%s02",secret[:4],secret[4:])
-    return NewTOTP([]byte(mySecret),6,30).Now()
+    return gotp.NewTOTP(mySecret, 6, 30, nil).Now()
 }
 
 func RTOTPCodeWithTime(secret string,dt time.Time) string {
     mySecret := fmt.Sprintf("ray%s1989%s02",secret[:4],secret[4:])
-    return NewTOTP([]byte(mySecret),6,30).Time(dt)
+    return gotp.NewTOTP(mySecret, 6, 30, nil).At(int(dt.Unix()))
 }
