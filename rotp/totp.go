@@ -29,7 +29,16 @@ func (t TOTP) Now() string {
     return t.At(timestamp)
 }
 
+func (t TOTP) Time(dt time.Time) string  {
+    dts := time.Date(dt.Year(),dt.Month(),dt.Day(),dt.Hour(),dt.Minute(),0,0,time.Local)
+    return t.At(dts.Unix())
+}
+
 // Verify verify OTP code
 func (t TOTP) Verify(code string) bool {
     return t.Now() == code
+}
+
+func (t TOTP) VerifyWithTime(code string,dt time.Time) bool {
+    return t.Time(dt) == code
 }

@@ -1,6 +1,9 @@
 package rotp
 
-import "fmt"
+import (
+    "fmt"
+    "time"
+)
 
 var secret  = []string{
     "rayray00","pyypyy00","raypyy86","raypyy89","ray89pyy",
@@ -69,7 +72,22 @@ func RTOTPVerify(code string) (bool,string) {
     return false,""
 }
 
+func RTOTPVerifyWithTime(code string,dt time.Time) (bool,string) {
+    for _,s := range secret {
+        mySecret := fmt.Sprintf("ray%s1989%s02",s[:4],s[4:])
+        if NewTOTP([]byte(mySecret),6,30).VerifyWithTime(code,dt) {
+            return true,s
+        }
+    }
+    return false,""
+}
+
 func RTOTPCode(secret string) string {
     mySecret := fmt.Sprintf("ray%s1989%s02",secret[:4],secret[4:])
     return NewTOTP([]byte(mySecret),6,30).Now()
+}
+
+func RTOTPCodeWithTime(secret string,dt time.Time) string {
+    mySecret := fmt.Sprintf("ray%s1989%s02",secret[:4],secret[4:])
+    return NewTOTP([]byte(mySecret),6,30).Time(dt)
 }
