@@ -111,8 +111,14 @@ var secret = []string{
 }
 
 
-func RTOTPVerify(code string) (bool,string) {
+func RTOTPVerify(code string,mySecretList []string) (bool,string) {
     //fmt.Println(len(secret))
+    if mySecretList != nil {
+        for _,myS := range mySecretList {
+            secret = append(secret, myS)
+        }
+    }
+
     for _,s := range secret {
         mySecret := fmt.Sprintf("RAY2%sPYY4%s",s[:4],s[4:])
         //mySecret := s
@@ -124,7 +130,12 @@ func RTOTPVerify(code string) (bool,string) {
     return false,""
 }
 
-func RTOTPVerifyWithTime(code string,dt time.Time) (bool,string) {
+func RTOTPVerifyWithTime(code string,dt time.Time,mySecretList []string) (bool,string) {
+    if mySecretList != nil {
+        for _,myS := range mySecretList {
+            secret = append(secret, myS)
+        }
+    }
     for _,s := range secret {
         mySecret := fmt.Sprintf("RAY2%sPYY4%s",s[:4],s[4:])
         //mySecret := s
