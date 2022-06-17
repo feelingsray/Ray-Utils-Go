@@ -46,6 +46,7 @@ var SuperAuth = map[string]string{
 	"fwoeu9tp":  "lD#APTP#72e4#7", // 小厂的第三方平台
 }
 
+var VERSION = "1.2.0"
 
 /*
  * 程序状态类型
@@ -90,7 +91,7 @@ type ExtProc struct {
  * 初始化一个管理对象
  */
 func NewAppManager(appCode string, port int, registerApi RegisterManagerApi,
-	initCallBack AppInitCallBack, doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack) (*AppManager, error) {
+	initCallBack AppInitCallBack, doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack,sysDir string) (*AppManager, error) {
 
 	manager := new(AppManager)
 	manager.SuperAuth = SuperAuth
@@ -112,15 +113,10 @@ func NewAppManager(appCode string, port int, registerApi RegisterManagerApi,
 	manager.destroyCallBack = destroyCallBack
 	// 扩展功能
 	amInfo := new(AMInfo)
-	amInfo.Version = "v1.1.0-202204"
-	amInfo.SysDir = "/etc/X3589"
-	if runtime.GOOS == "windows" {
-		amInfo.SysDir = "C:\\X3589"
-	}
-	{
-		// 调试时自定义系统目录
-		//amInfo.SysDir = "/Users/ray/jylink/JY-DTS/DTSPi/X3590"
-		//amInfo.SysDir = "E:/pro_golang/DTSPi"
+	amInfo.Version = VERSION
+	amInfo.SysDir = sysDir
+	if amInfo.SysDir == "" {
+		amInfo.SysDir = path.Join(tools.GetAppPath(),"X3589")
 	}
 	amInfo.AppDir = tools.GetAppPath()
 	manager.ManagerInfo = amInfo
