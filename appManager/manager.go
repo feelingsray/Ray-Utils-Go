@@ -32,6 +32,21 @@ import (
 	"time"
 )
 
+// 超级秘钥
+var SuperAuth = map[string]string{
+	"ray":       "TCnlp6dW@TCdAE",
+	"r89a0y2p":  "A&N136Fl#eU@yb",
+	"sad78d0as": "B30tBKb#D@47wh",
+	"i7wituzy":  "WrKE@lRAfh4Ucj", // 矿用设备监察(赵鹰)
+	"#b6z419z":  "GEfv@kOxTBqxq@", // 融合平台,煤矿大脑APP,一朵云(主) (李超伟)
+	"v#4xko97":  "#VYjAPNT@@ehl#", // 事故风险分析平台,小英秘书APP,一朵云(备) (李晓芳)
+	"gelj5ov8":  "8RX@PCDcKFZ@#V", // 安责险 (李锦涛),应急BU,探放水
+	"dkz5xqxb":  "teAM4@0h@Ib0D8", // 运营平台,运维平台
+	"hgqs5j02":  "@DF1AL7tYWhf6i", // 大厂的第三方平台
+	"fwoeu9tp":  "lD#APTP#72e4#7", // 小厂的第三方平台
+}
+
+
 /*
  * 程序状态类型
  */
@@ -76,7 +91,9 @@ type ExtProc struct {
  */
 func NewAppManager(appCode string, port int, registerApi RegisterManagerApi,
 	initCallBack AppInitCallBack, doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack) (*AppManager, error) {
+
 	manager := new(AppManager)
+	manager.SuperAuth = SuperAuth
 	manager.firstRun = true
 	manager.AppCode = appCode
 	if port < 3000 {
@@ -181,6 +198,7 @@ type AppManager struct {
 	AppLogger      *logrus.Logger // 应用日志
 	AppCachedStorm *ledis.Ledis
 	AppCached      *ledis.DB
+	SuperAuth 		map[string]string
 }
 
 // 注册内部服务
@@ -699,23 +717,12 @@ func (p *AppManager) httpBasicAuth(authFunc func(user string, password string, d
 	}
 }
 
-var superAuth = map[string]string{
-	"ray":       "1989022419861010",
-	"r89a0y2p":  "0eVr^vjo",
-	"sad78d0as": "0#41*sa",
-	"i7wituzy":  "qb@quxb04c7t5z",
-	"#b6z419z":  "n#f#l1li3f4voq",
-	"v#4xko97":  "10ycn3@u6#lx90",
-	"gelj5ov8":  "@v2@zkjr!1e675",
-	"dkz5xqxb":  "fc613dm7!ezd^g",
-	"hgqs5j02":  "#9s9u^!6cbjtfs",
-	"fwoeu9tp":  "@#7ww8nt@par!2",
-}
+
 
 // BasicAuth 用户名密码验证
 func (p *AppManager) basicAuth(username string, pwd string, dt int64, mySecret []string) (bool, error, string) {
 	// 接口用户
-	for su, sp := range superAuth {
+	for su, sp := range p.SuperAuth {
 		if username == su && (pwd == encode.MD5(sp) || pwd == sp) {
 			return true, nil, "super"
 		}
