@@ -152,19 +152,15 @@ func NewAppManager(appCode string, port int, registerApi RegisterManagerApi,
 	return manager, nil
 }
 
-//export RegisterManagerApi
 // 注册管理API
 type RegisterManagerApi func(engRouter *gin.RouterGroup)
 
-//export AppInitCallBack
 // 执行初始化回调
 type AppInitCallBack func(am *AppManager) error
 
-//export AppDoCallBack
 // 执行方法回调
 type AppDoCallBack func(code string, am *AppManager)
 
-//export AppDestroyCallBack
 // 执行销毁回调
 type AppDestroyCallBack func(am *AppManager) error
 
@@ -992,10 +988,8 @@ func (p *AppManager) Manager(webPath string, version map[string]interface{}) {
 	mapi.GET("/proc/list/", p.getProcListApi)
 	// 注册外部服务API
 	mapi.GET("/extProc/list/", p.getExtProcListApi)
-
-	// 注册AppAPI
-	api := p.engRouter.Group("/api/")
-	p.registerManagerApi(api)
+	// 注入外部managerAPI接口
+	p.registerManagerApi(mapi)
 
 	server := &http.Server{
 		Addr:           fmt.Sprintf(":%d", p.port),
