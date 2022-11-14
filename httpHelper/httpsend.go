@@ -2,6 +2,7 @@ package httpHelper
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"net/http"
 
@@ -57,7 +58,7 @@ func HttpGet(url string) (int, string, error) {
 		return 500, "", err
 	}
 	defer resp.Body.Close()
-	respBody, _ := ioutil.ReadAll(resp.Body)
+	respBody, _ := io.ReadAll(resp.Body)
 	return resp.StatusCode, string(respBody), nil
 
 }

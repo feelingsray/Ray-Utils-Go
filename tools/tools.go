@@ -7,13 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 )
 
-/*
- * 数组反转
- */
-func ReverseInterfaceArrary(s []interface{}) []interface{} {
+func ReverseInterfaceArray(s []interface{}) []interface{} {
 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 		s[i], s[j] = s[j], s[i]
 	}
@@ -92,21 +89,20 @@ func HashShortStr(data string) []string {
 	return resUrl
 }
 
-// 短字符串
 func AutoShortStr(len int) string {
 	chars := strings.Split("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", "")
-	hex := fmt.Sprintf("%x", md5.Sum(uuid.NewV4().Bytes()))
+	v4 := uuid.NewV4()
+	hex := fmt.Sprintf("%x", md5.Sum(v4.Bytes()))
 	val, _ := strconv.ParseInt(hex[8:8+8], 16, 0)
 	lHexLong := val & 0x3fffffff
 	outChars := ""
 	for j := 0; j < len; j++ {
 		outChars += chars[0x0000003D&lHexLong]
-		lHexLong >>= 5
+		lHexLong >>= 3
 	}
 	return outChars
 }
 
-//查找对象是否在字符串内
 func ObjectInArray(obj interface{}, target interface{}) bool {
 	targetValue := reflect.ValueOf(target)
 	switch reflect.TypeOf(target).Kind() {
@@ -124,7 +120,6 @@ func ObjectInArray(obj interface{}, target interface{}) bool {
 	return false
 }
 
-// 字符串数组中包含字符串
 func StringsContains(obj string, list []string) bool {
 	for _, v := range list {
 		if v == obj {

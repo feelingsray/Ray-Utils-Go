@@ -5,7 +5,6 @@ go 1.18
 require (
 	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-gonic/gin v1.7.4
-	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/json-iterator/go v1.1.12
 	github.com/ledisdb/ledisdb v0.0.0-20200510135210-d35789ec47e6
 	github.com/orcaman/concurrent-map v1.0.0
