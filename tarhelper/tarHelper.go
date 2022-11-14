@@ -88,7 +88,7 @@ func DeTarGzCompress(tarFile, dest string) error {
 			}
 		}
 		filename := dest + hdr.Name
-		filenamelist := strings.Split(filename,"/")
+		filenamelist := strings.Split(filename, "/")
 		if filenamelist[len(filenamelist)-1] != "" {
 			file, err := createFile(filename)
 			if err != nil {

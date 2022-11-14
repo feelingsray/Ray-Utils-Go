@@ -102,20 +102,20 @@ func (c *LRUCache) Clear() {
 	c.cache = nil
 }
 
-func (c *LRUCache) GetKeys() []string{
+func (c *LRUCache) GetKeys() []string {
 	if c.cache == nil {
 		return nil
 	}
-	keys := make([]string,0)
-	for k,_ := range c.cache {
-		keys = append(keys,k)
+	keys := make([]string, 0)
+	for k, _ := range c.cache {
+		keys = append(keys, k)
 	}
 	return keys
 }
 
 func (c *LRUCache) GetAll() map[string]interface{} {
 	data := make(map[string]interface{})
-	for k,v := range c.cache {
+	for k, v := range c.cache {
 		data[k] = v.Value.(*entry).value
 	}
 	return data

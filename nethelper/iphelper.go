@@ -6,7 +6,7 @@ import (
 
 func GetIPAddressByName(name string) string {
 	addr, _ := net.InterfaceByName(name)
-	addrs,_ := addr.Addrs()
+	addrs, _ := addr.Addrs()
 	data := ""
 	for _, address := range addrs {
 

@@ -2,19 +2,21 @@ package main
 
 import (
 	"fmt"
-	"github.com/feelingsray/Ray-Utils-Go/tools"
-	"github.com/gomodule/redigo/redis"
 	"io/ioutil"
 	"log"
 	"path"
 	"plugin"
 	"time"
+
+	"github.com/gomodule/redigo/redis"
+
+	"github.com/feelingsray/Ray-Utils-Go/tools"
 )
 
 func main() {
 	appDir := tools.GetAppPath()
 	appDir = "/Users/ray/jylink/Ray-Utils-Go/demo/plugindemo"
-	pluginDir := path.Join(appDir,"pkg")
+	pluginDir := path.Join(appDir, "pkg")
 	dirList, err := ioutil.ReadDir(pluginDir)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -25,13 +27,13 @@ func main() {
 
 	// redis连接池
 	redisPool := &redis.Pool{
-		MaxIdle: 1000, /*最大的空闲连接数*/
-		MaxActive: 1000, /*最大的激活连接数*/
-		IdleTimeout: time.Duration(3)*time.Second,
+		MaxIdle:     1000, /*最大的空闲连接数*/
+		MaxActive:   1000, /*最大的激活连接数*/
+		IdleTimeout: time.Duration(3) * time.Second,
 		Dial: func() (redis.Conn, error) {
 			// 访问本地,端口固定
 			redisAddr := "192.168.111.140:6379"
-			c, err := redis.Dial("tcp",redisAddr)
+			c, err := redis.Dial("tcp", redisAddr)
 			if err != nil {
 				fmt.Println(err.Error())
 				return nil, err
@@ -48,17 +50,17 @@ func main() {
 	args["redis"] = redisPool
 
 	for {
-		for i,pluginFile := range dirList {
-			pluginPath := path.Join(pluginDir,pluginFile.Name())
+		for i, pluginFile := range dirList {
+			pluginPath := path.Join(pluginDir, pluginFile.Name())
 			so, err := plugin.Open(pluginPath)
 			if err != nil {
 				log.Fatal(err.Error())
 			}
 			p, _ := so.Lookup("Plugin")
 			f := p.(func(map[string]interface{}))
-			args["plugin"] = fmt.Sprintf("%d",i)
+			args["plugin"] = fmt.Sprintf("%d", i)
 			f(args)
-			time.Sleep(1*time.Second)
+			time.Sleep(1 * time.Second)
 		}
 	}
 

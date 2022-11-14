@@ -58,13 +58,12 @@ func CopyFile(dstName string, srcName string) error {
 		return err
 	}
 	defer dst.Close()
-	_,err = io.Copy(dst, src)
+	_, err = io.Copy(dst, src)
 	if err != nil {
 		return err
 	}
 	return nil
 }
-
 
 func GetAllFile(pathname string, s []string) ([]string, error) {
 	rd, err := ioutil.ReadDir(pathname)

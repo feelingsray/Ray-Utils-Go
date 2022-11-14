@@ -5,11 +5,9 @@ import (
 	"errors"
 )
 
-
 /*
  * DES/ECB/PKCS5Padding
  */
-
 
 func DESEncrypt(src, key []byte) ([]byte, error) {
 	block, err := des.NewCipher(key)
@@ -18,7 +16,7 @@ func DESEncrypt(src, key []byte) ([]byte, error) {
 	}
 	bs := block.BlockSize()
 	src = PKCS5Padding(src, bs)
-	if len(src) % bs != 0 {
+	if len(src)%bs != 0 {
 		return nil, errors.New("Need a multiple of the blocksize")
 	}
 	out := make([]byte, len(src))
@@ -39,7 +37,7 @@ func DESDecrypt(src, key []byte) ([]byte, error) {
 	out := make([]byte, len(src))
 	dst := out
 	bs := block.BlockSize()
-	if len(src) % bs != 0 {
+	if len(src)%bs != 0 {
 		return nil, errors.New("crypto/cipher: input not full blocks")
 	}
 	for len(src) > 0 {

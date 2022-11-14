@@ -2,13 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/feelingsray/Ray-Utils-Go/rayproxy/services"
-	"gopkg.in/alecthomas/kingpin.v2"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"gopkg.in/alecthomas/kingpin.v2"
+
+	"github.com/feelingsray/Ray-Utils-Go/rayproxy/services"
 )
 
 const APP_VERSION = "3.0"
@@ -119,6 +121,7 @@ func poster() {
 		
 		v%s`+" by snail , blog : http://www.host900.com/\n\n", APP_VERSION)
 }
+
 func tlsBytes(cert, key string) (certBytes, keyBytes []byte) {
 	certBytes, err := ioutil.ReadFile(cert)
 	if err != nil {
@@ -140,6 +143,7 @@ func main() {
 	}
 	Clean(&service.S)
 }
+
 func Clean(s *services.Service) {
 	signalChan := make(chan os.Signal, 1)
 	cleanupDone := make(chan bool)

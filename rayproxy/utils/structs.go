@@ -21,6 +21,7 @@ type Checker struct {
 	interval   int64
 	timeout    int
 }
+
 type CheckerItem struct {
 	IsHTTPS      bool
 	Method       string
@@ -70,6 +71,7 @@ func (c *Checker) loadMap(f string) (dataMap ConcurrentMap) {
 	}
 	return
 }
+
 func (c *Checker) start() {
 	go func() {
 		for {
@@ -101,6 +103,7 @@ func (c *Checker) start() {
 		}
 	}()
 }
+
 func (c *Checker) isNeedCheck(item CheckerItem) bool {
 	var minCount uint = 5
 	if (item.SuccessCount >= minCount && item.SuccessCount > item.FailCount) ||
@@ -111,6 +114,7 @@ func (c *Checker) isNeedCheck(item CheckerItem) bool {
 	}
 	return true
 }
+
 func (c *Checker) IsBlocked(address string) (blocked bool, failN, successN uint) {
 	if c.domainIsInMap(address, true) {
 		//log.Printf("%s in blocked ? true", address)
@@ -130,6 +134,7 @@ func (c *Checker) IsBlocked(address string) (blocked bool, failN, successN uint)
 
 	return item.FailCount >= item.SuccessCount, item.FailCount, item.SuccessCount
 }
+
 func (c *Checker) domainIsInMap(address string, blockedMap bool) bool {
 	u, err := url.Parse("http://" + address)
 	if err != nil {
@@ -153,6 +158,7 @@ func (c *Checker) domainIsInMap(address string, blockedMap bool) bool {
 	}
 	return false
 }
+
 func (c *Checker) Add(address string, isHTTPS bool, method, URL string, data []byte) {
 	if c.domainIsInMap(address, false) || c.domainIsInMap(address, true) {
 		return
@@ -182,6 +188,7 @@ func NewBasicAuth() BasicAuth {
 		data: NewConcurrentMap(),
 	}
 }
+
 func (ba *BasicAuth) AddFromFile(file string) (n int, err error) {
 	_content, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -221,6 +228,7 @@ func (ba *BasicAuth) Check(userpass string) (ok bool) {
 	}
 	return
 }
+
 func (ba *BasicAuth) Total() (n int) {
 	n = ba.data.Count()
 	return
@@ -276,6 +284,7 @@ func NewHTTPRequest(inConn *net.Conn, bufSize int, isBasicAuth bool, basicAuth *
 	}
 	return
 }
+
 func (req *HTTPRequest) HTTP() (err error) {
 	if req.isBasicAuth {
 		err = req.BasicAuth()
@@ -291,16 +300,19 @@ func (req *HTTPRequest) HTTP() (err error) {
 	}
 	return
 }
+
 func (req *HTTPRequest) HTTPS() (err error) {
 	req.Host = req.hostOrURL
 	req.addPortIfNot()
 	//_, err = fmt.Fprint(*req.conn, "HTTP/1.1 200 Connection established\r\n\r\n")
 	return
 }
+
 func (req *HTTPRequest) HTTPSReply() (err error) {
 	_, err = fmt.Fprint(*req.conn, "HTTP/1.1 200 Connection established\r\n\r\n")
 	return
 }
+
 func (req *HTTPRequest) IsHTTPS() bool {
 	return req.Method == "CONNECT"
 }
@@ -337,6 +349,7 @@ func (req *HTTPRequest) BasicAuth() (err error) {
 	}
 	return
 }
+
 func (req *HTTPRequest) getHTTPURL() (URL string, err error) {
 	if !strings.HasPrefix(req.hostOrURL, "/") {
 		return req.hostOrURL, nil
@@ -348,6 +361,7 @@ func (req *HTTPRequest) getHTTPURL() (URL string, err error) {
 	URL = fmt.Sprintf("http://%s%s", _host, req.hostOrURL)
 	return
 }
+
 func (req *HTTPRequest) getHeader(key string) (val string, err error) {
 	key = strings.ToUpper(key)
 	lines := strings.Split(string(req.HeadBuf), "\r\n")
@@ -428,6 +442,7 @@ func NewOutPool(dur int, isTLS bool, certBytes, keyBytes []byte, address string,
 	}
 	return
 }
+
 func (op *OutPool) getConn() (conn interface{}, err error) {
 	if op.isTLS {
 		var _conn tls.Conn

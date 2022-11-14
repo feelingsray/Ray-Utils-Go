@@ -10,6 +10,7 @@ type Service interface {
 	Start(args interface{}) (err error)
 	Clean()
 }
+
 type ServiceItem struct {
 	S    Service
 	Args interface{}
@@ -25,6 +26,7 @@ func Regist(name string, s Service, args interface{}) {
 		Name: name,
 	}
 }
+
 func Run(name string) (service *ServiceItem, err error) {
 	service, ok := servicesMap[name]
 	if ok {

@@ -5,11 +5,16 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/feelingsray/Ray-Utils-Go/encode"
-	"github.com/feelingsray/Ray-Utils-Go/logger"
-	"github.com/feelingsray/Ray-Utils-Go/nethelper"
-	"github.com/feelingsray/Ray-Utils-Go/rotp"
-	"github.com/feelingsray/Ray-Utils-Go/tools"
+	"net/http"
+	"os/exec"
+	"path"
+	"regexp"
+	"runtime"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	lediscfg "github.com/ledisdb/ledisdb/config"
@@ -21,15 +26,12 @@ import (
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/process"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"os/exec"
-	"path"
-	"regexp"
-	"runtime"
-	"sort"
-	"strconv"
-	"strings"
-	"time"
+
+	"github.com/feelingsray/Ray-Utils-Go/encode"
+	"github.com/feelingsray/Ray-Utils-Go/logger"
+	"github.com/feelingsray/Ray-Utils-Go/nethelper"
+	"github.com/feelingsray/Ray-Utils-Go/rotp"
+	"github.com/feelingsray/Ray-Utils-Go/tools"
 )
 
 // 超级秘钥
@@ -91,7 +93,7 @@ type ExtProc struct {
  * 初始化一个管理对象
  */
 func NewAppManager(appCode string, port int, registerApi RegisterManagerApi,
-	initCallBack AppInitCallBack, doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack,sysDir string) (*AppManager, error) {
+	initCallBack AppInitCallBack, doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack, sysDir string) (*AppManager, error) {
 
 	manager := new(AppManager)
 	manager.SuperAuth = SuperAuth
@@ -116,7 +118,7 @@ func NewAppManager(appCode string, port int, registerApi RegisterManagerApi,
 	amInfo.Version = VERSION
 	amInfo.SysDir = sysDir
 	if amInfo.SysDir == "" {
-		amInfo.SysDir = path.Join(tools.GetAppPath(),"X3589")
+		amInfo.SysDir = path.Join(tools.GetAppPath(), "X3589")
 	}
 	amInfo.AppDir = tools.GetAppPath()
 	manager.ManagerInfo = amInfo
@@ -190,7 +192,7 @@ type AppManager struct {
 	AppLogger      *logrus.Logger // 应用日志
 	AppCachedStorm *ledis.Ledis
 	AppCached      *ledis.DB
-	SuperAuth 		map[string]string
+	SuperAuth      map[string]string
 }
 
 // 注册内部服务
@@ -534,6 +536,7 @@ func (p *AppManager) restartProcApi(c *gin.Context) {
 		return
 	}
 }
+
 func (p *AppManager) stopProcApi(c *gin.Context) {
 	code := c.Query("code")
 	if code == "" {
@@ -545,6 +548,7 @@ func (p *AppManager) stopProcApi(c *gin.Context) {
 		return
 	}
 }
+
 func (p *AppManager) getProcListApi(c *gin.Context) {
 	data := make(map[string]interface{})
 	serviceList := make(map[string]*Proc)
@@ -556,6 +560,7 @@ func (p *AppManager) getProcListApi(c *gin.Context) {
 	c.JSON(200, data)
 	return
 }
+
 func (p *AppManager) addProcApi(c *gin.Context) {
 	code := c.Query("code")
 	name := c.Query("name")
@@ -571,6 +576,7 @@ func (p *AppManager) addProcApi(c *gin.Context) {
 	c.JSON(200, "注册服务成功")
 	return
 }
+
 func (p *AppManager) deleteProcApi(c *gin.Context) {
 	// 先停止这个服务的协程
 	p.stopProcApi(c)
@@ -626,7 +632,7 @@ func (p *AppManager) login(c *gin.Context) {
 	}
 	mySecretList := make([]string, 0)
 	if myS {
-		mySecretList = append(mySecretList,mySecret)
+		mySecretList = append(mySecretList, mySecret)
 	}
 	ok, err, key := p.basicAuth(username, password, int64(tt), mySecretList)
 	if err != nil {
@@ -709,8 +715,6 @@ func (p *AppManager) httpBasicAuth(authFunc func(user string, password string, d
 	}
 }
 
-
-
 // BasicAuth 用户名密码验证
 func (p *AppManager) basicAuth(username string, pwd string, dt int64, mySecret []string) (bool, error, string) {
 	// 接口用户
@@ -769,8 +773,10 @@ type ProcessResources struct {
 
 type ProcessResourcesSlice []ProcessResources
 
-func (s ProcessResourcesSlice) Len() int           { return len(s) }
-func (s ProcessResourcesSlice) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s ProcessResourcesSlice) Len() int { return len(s) }
+
+func (s ProcessResourcesSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+
 func (s ProcessResourcesSlice) Less(i, j int) bool { return s[i].Resources > s[j].Resources }
 
 // 获取宿主机硬件信息

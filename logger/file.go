@@ -255,4 +255,3 @@ func (w *LogWriter) Destroy() {
 func (w *LogWriter) Flush() {
 	_ = w.mw.fd.Sync()
 }
-

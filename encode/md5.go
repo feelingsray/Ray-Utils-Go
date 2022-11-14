@@ -6,12 +6,11 @@ import (
 	"io/ioutil"
 )
 
-func Md5Str(str string) string  {
+func Md5Str(str string) string {
 	h := md5.New()
 	h.Write([]byte(str))
 	return hex.EncodeToString(h.Sum(nil))
 }
-
 
 func MD5Bytes(s []byte) string {
 	ret := md5.Sum(s)
@@ -24,7 +23,7 @@ func MD5(s string) string {
 }
 
 //计算文件MD5值
-func MD5File(file string) (string) {
+func MD5File(file string) string {
 	data, err := ioutil.ReadFile(file)
 	if err != nil {
 		return ""

@@ -3,7 +3,7 @@ package encode
 // BytesToBinaryString get the string in binary format of a []byte or []int8.
 func BytesToBinaryString(bs []byte) string {
 	l := len(bs)
-	bl := l*8
+	bl := l * 8
 	buf := make([]byte, 0, bl)
 	for _, b := range bs {
 		buf = appendBinaryString(buf, b)

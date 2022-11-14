@@ -19,22 +19,26 @@ type Args struct {
 	CertBytes []byte
 	KeyBytes  []byte
 }
+
 type TunnelServerArgs struct {
 	Args
 	IsUDP   *bool
 	Key     *string
 	Timeout *int
 }
+
 type TunnelClientArgs struct {
 	Args
 	IsUDP   *bool
 	Key     *string
 	Timeout *int
 }
+
 type TunnelBridgeArgs struct {
 	Args
 	Timeout *int
 }
+
 type TCPArgs struct {
 	Args
 	ParentType          *string
@@ -59,6 +63,7 @@ type HTTPArgs struct {
 	PoolSize            *int
 	CheckParentInterval *int
 }
+
 type UDPArgs struct {
 	Args
 	ParentType          *string

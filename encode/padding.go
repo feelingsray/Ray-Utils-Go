@@ -2,7 +2,6 @@ package encode
 
 import "bytes"
 
-
 func PKCS5Padding(cipherText []byte, blockSize int) []byte {
 	padding := blockSize - len(cipherText)%blockSize
 	padText := bytes.Repeat([]byte{byte(padding)}, padding)
@@ -16,7 +15,7 @@ func PKCS5UnPadding(encrypt []byte) []byte {
 
 //使用PKCS7进行填充
 func PKCS7Padding(ciphertext []byte, blockSize int) []byte {
-	padding := blockSize - len(ciphertext) % blockSize
+	padding := blockSize - len(ciphertext)%blockSize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
 	return append(ciphertext, padtext...)
 }
@@ -26,7 +25,6 @@ func PKCS7UnPadding(origData []byte) []byte {
 	unpadding := int(origData[length-1])
 	return origData[:(length - unpadding)]
 }
-
 
 func ZeroPadding(ciphertext []byte, blockSize int) []byte {
 	padding := blockSize - len(ciphertext)%blockSize
@@ -40,4 +38,3 @@ func ZeroUnPadding(origData []byte) []byte {
 			return r == rune(0)
 		})
 }
-

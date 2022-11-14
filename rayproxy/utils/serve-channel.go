@@ -24,9 +24,11 @@ func NewServerChannel(ip string, port int) ServerChannel {
 		},
 	}
 }
+
 func (sc *ServerChannel) SetErrAcceptHandler(fn func(err error)) {
 	sc.errAcceptHandler = fn
 }
+
 func (sc *ServerChannel) ListenTls(certBytes, keyBytes []byte, fn func(conn net.Conn)) (err error) {
 	sc.Listener, err = ListenTls(sc.ip, sc.port, certBytes, keyBytes)
 	if err == nil {
@@ -91,6 +93,7 @@ func (sc *ServerChannel) ListenTCP(fn func(conn net.Conn)) (err error) {
 	}
 	return
 }
+
 func (sc *ServerChannel) ListenUDP(fn func(packet []byte, localAddr, srcAddr *net.UDPAddr)) (err error) {
 	addr := &net.UDPAddr{IP: net.ParseIP(sc.ip), Port: sc.port}
 	l, err := net.ListenUDP("udp", addr)

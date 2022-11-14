@@ -34,7 +34,7 @@ func (m *ModBusHelper) LinerScaling(value interface{}, offset float64, rawHeight
 	return data, nil
 }
 
-func (m *ModBusHelper) ByteTo(data []byte,dataType string,displayType string) (interface{},error) {
+func (m *ModBusHelper) ByteTo(data []byte, dataType string, displayType string) (interface{}, error) {
 
 	if dataType == "float" {
 		if len(data) != 4 {
@@ -108,11 +108,10 @@ func (m *ModBusHelper) ByteTo(data []byte,dataType string,displayType string) (i
 			return int16(bits), nil
 		}
 	}
-	return nil,nil
+	return nil, nil
 }
 
-
-func (m *ModBusHelper) ToByte(data interface{},dataType string,displayType string) ([]byte,error) {
+func (m *ModBusHelper) ToByte(data interface{}, dataType string, displayType string) ([]byte, error) {
 
 	if dataType == "float" {
 		if reflect.TypeOf(data).Kind() != reflect.Float32 {
@@ -209,5 +208,5 @@ func (m *ModBusHelper) ToByte(data interface{},dataType string,displayType strin
 			return bytes, nil
 		}
 	}
-	return nil,nil
+	return nil, nil
 }

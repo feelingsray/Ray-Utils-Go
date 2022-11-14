@@ -3,12 +3,14 @@ package logger
 import (
 	"errors"
 	"fmt"
-	"github.com/feelingsray/Ray-Utils-Go/tools"
+	"os"
+	"path/filepath"
+
 	"github.com/sirupsen/logrus"
 	"github.com/weekface/mgorus"
 	"gopkg.in/mgo.v2"
-	"os"
-	"path/filepath"
+
+	"github.com/feelingsray/Ray-Utils-Go/tools"
 )
 
 const (

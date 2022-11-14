@@ -4,8 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/feelingsray/Ray-Utils-Go/tools/common"
 	"github.com/tidwall/gjson"
+
+	"github.com/feelingsray/Ray-Utils-Go/tools/common"
 )
 
 // IOTA 数联网接入模块

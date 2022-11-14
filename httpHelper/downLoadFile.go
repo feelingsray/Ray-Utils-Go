@@ -3,11 +3,12 @@ package httpHelper
 import (
 	"errors"
 	"fmt"
-	"github.com/feelingsray/Ray-Utils-Go/encode"
 	"io"
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/feelingsray/Ray-Utils-Go/encode"
 )
 
 func IsFileExist(filename string, filesize int64) bool {
@@ -26,10 +27,11 @@ func IsFileExist(filename string, filesize int64) bool {
 	}
 	return false
 }
-func DownloadFile(url string, localPath string,AK string,SK string) error {
+
+func DownloadFile(url string, localPath string, AK string, SK string) error {
 	var (
 		fsize   int64
-		buf= make([]byte, 32*1024)
+		buf     = make([]byte, 32*1024)
 		written int64
 	)
 	tmpFilePath := localPath + ".download"
@@ -38,7 +40,7 @@ func DownloadFile(url string, localPath string,AK string,SK string) error {
 	client := &http.Client{}
 	//get方法获取资源
 	req, err := http.NewRequest("GET", url, nil)
-	req.Header.Set("Authorization", encode.BasicAuth(AK,SK))
+	req.Header.Set("Authorization", encode.BasicAuth(AK, SK))
 	if err != nil {
 		return err
 	}

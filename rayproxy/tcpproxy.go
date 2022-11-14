@@ -2,20 +2,21 @@ package main
 
 import (
 	"fmt"
-	"github.com/feelingsray/Ray-Utils-Go/encode"
-	"github.com/feelingsray/Ray-Utils-Go/rayproxy/services"
-	"github.com/feelingsray/Ray-Utils-Go/tools"
 	"log"
 	"os"
 	"os/signal"
 	"path"
 	"syscall"
+
+	"github.com/feelingsray/Ray-Utils-Go/encode"
+	"github.com/feelingsray/Ray-Utils-Go/rayproxy/services"
+	"github.com/feelingsray/Ray-Utils-Go/tools"
 )
 
 type tcpArg struct {
-	Name string 	`yaml:"name"`
-	Local  int 		`yaml:"local"`
-	Remote string	`yaml:"remote"`
+	Name   string `yaml:"name"`
+	Local  int    `yaml:"local"`
+	Remote string `yaml:"remote"`
 }
 
 func main() {
@@ -43,19 +44,17 @@ func main() {
 		tcpArgs.Args = args
 		services.Regist(arg.Name, services.NewTCP(), tcpArgs)
 	}
-	runServiceList := make([]*services.ServiceItem,0)
+	runServiceList := make([]*services.ServiceItem, 0)
 	for _, arg := range argList {
 		service, err := services.Run(arg.Name)
 		if err != nil {
 			log.Fatalf("run service [%s] fail, ERR:%s", service, err)
 		}
-		runServiceList = append(runServiceList,service)
+		runServiceList = append(runServiceList, service)
 
 	}
 
-	select {
-
-	}
+	select {}
 
 	signalChan := make(chan os.Signal, 1)
 	cleanupDone := make(chan bool)
@@ -68,7 +67,7 @@ func main() {
 	go func() {
 		for _ = range signalChan {
 			fmt.Println("\nReceived an interrupt, stopping services...")
-			for _,service := range runServiceList{
+			for _, service := range runServiceList {
 				(service.S).Clean()
 			}
 			cleanupDone <- true

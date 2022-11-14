@@ -62,5 +62,5 @@ func CheckCRC16(pucFrame []byte, usLen int) []byte {
 		ucCRCHi = int(aucCRCLo[iIndex])
 	}
 	//return ucCRCHi<<8 | ucCRCLo
-	return []byte{byte(ucCRCLo),byte(ucCRCHi)}
+	return []byte{byte(ucCRCLo), byte(ucCRCHi)}
 }

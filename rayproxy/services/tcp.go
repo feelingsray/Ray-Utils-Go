@@ -2,13 +2,14 @@ package services
 
 import (
 	"fmt"
-	"github.com/feelingsray/Ray-Utils-Go/rayproxy/utils"
 	"io"
 	"log"
 	"net"
 	"runtime/debug"
 	"strconv"
 	"time"
+
+	"github.com/feelingsray/Ray-Utils-Go/rayproxy/utils"
 )
 
 type TCP struct {
@@ -22,14 +23,17 @@ func NewTCP() Service {
 		cfg:     TCPArgs{},
 	}
 }
+
 func (s *TCP) InitService() {
 	s.InitOutConnPool()
 }
+
 func (s *TCP) StopService() {
 	if s.outPool.Pool != nil {
 		s.outPool.Pool.ReleaseAll()
 	}
 }
+
 func (s *TCP) Start(args interface{}) (err error) {
 	s.cfg = args.(TCPArgs)
 	if *s.cfg.Parent != "" {
@@ -58,6 +62,7 @@ func (s *TCP) Start(args interface{}) (err error) {
 func (s *TCP) Clean() {
 	s.StopService()
 }
+
 func (s *TCP) callback(inConn net.Conn) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -80,6 +85,7 @@ func (s *TCP) callback(inConn net.Conn) {
 		utils.CloseConn(&inConn)
 	}
 }
+
 func (s *TCP) OutToTCP(inConn *net.Conn) (err error) {
 	var outConn net.Conn
 	var _outConn interface{}
@@ -104,6 +110,7 @@ func (s *TCP) OutToTCP(inConn *net.Conn) (err error) {
 	log.Printf("conn %s - %s - %s -%s connected", inAddr, inLocalAddr, outLocalAddr, outAddr)
 	return
 }
+
 func (s *TCP) OutToUDP(inConn *net.Conn) (err error) {
 	log.Printf("conn created , remote : %s ", (*inConn).RemoteAddr())
 	for {
@@ -152,6 +159,7 @@ func (s *TCP) OutToUDP(inConn *net.Conn) (err error) {
 	return
 
 }
+
 func (s *TCP) InitOutConnPool() {
 	if *s.cfg.ParentType == TYPE_TLS || *s.cfg.ParentType == TYPE_TCP {
 		//dur int, isTLS bool, certBytes, keyBytes []byte,

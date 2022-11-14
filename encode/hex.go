@@ -10,13 +10,13 @@ import (
 /*
  * 16进制字符串转Byte数组
  */
-func HexStringToByte(src string) ([]byte,error){
+func HexStringToByte(src string) ([]byte, error) {
 	var dst []byte
 	_, err := fmt.Sscanf(src, "%X", &dst)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	return dst,nil
+	return dst, nil
 }
 
 /*
@@ -30,12 +30,12 @@ func ByteToHexString(src []byte) string {
 /*
  * Bytes 转 Int
  */
-func BytesToInt(bys []byte) (int,error) {
+func BytesToInt(bys []byte) (int, error) {
 	bytebuff := bytes.NewBuffer(bys)
 	var data int64
 	err := binary.Read(bytebuff, binary.BigEndian, &data)
 	if err != nil {
-		return 0,err
+		return 0, err
 	}
-	return int(data),nil
+	return int(data), nil
 }

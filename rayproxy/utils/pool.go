@@ -13,6 +13,7 @@ type ConnPool interface {
 	ReleaseAll()
 	Len() (length int)
 }
+
 type poolConfig struct {
 	Factory    func() (interface{}, error)
 	IsActive   func(interface{}) bool
@@ -130,6 +131,7 @@ func (p *netPool) Put(conn interface{}) {
 		p.config.Release(conn)
 	}
 }
+
 func (p *netPool) ReleaseAll() {
 	p.lock.Lock()
 	defer p.lock.Unlock()
@@ -140,6 +142,7 @@ func (p *netPool) ReleaseAll() {
 	p.conns = make(chan interface{}, p.config.InitialCap)
 
 }
+
 func (p *netPool) Len() (length int) {
 	return len(p.conns)
 }

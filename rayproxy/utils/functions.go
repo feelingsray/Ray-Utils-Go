@@ -14,11 +14,10 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"sync"
-
 	"runtime/debug"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -76,6 +75,7 @@ func IoBind(dst io.ReadWriter, src io.ReadWriter, fn func(isSrcErr bool, err err
 		}
 	}()
 }
+
 func ioCopy(dst io.Writer, src io.Reader, fn ...func(count int)) (written int64, isSrcErr bool, err error) {
 	buf := make([]byte, 32*1024)
 	for {
@@ -105,6 +105,7 @@ func ioCopy(dst io.Writer, src io.Reader, fn ...func(count int)) (written int64,
 	}
 	return written, isSrcErr, err
 }
+
 func TlsConnectHost(host string, timeout int, certBytes, keyBytes []byte) (conn tls.Conn, err error) {
 	h := strings.Split(host, ":")
 	port, _ := strconv.Atoi(h[1])
@@ -122,6 +123,7 @@ func TlsConnect(host string, port, timeout int, certBytes, keyBytes []byte) (con
 	}
 	return *tls.Client(_conn, conf), err
 }
+
 func getRequestTlsConfig(certBytes, keyBytes []byte) (conf *tls.Config, err error) {
 	var cert tls.Certificate
 	cert, err = tls.X509KeyPair(certBytes, keyBytes)
@@ -146,6 +148,7 @@ func ConnectHost(hostAndPort string, timeout int) (conn net.Conn, err error) {
 	conn, err = net.DialTimeout("tcp", hostAndPort, time.Duration(timeout)*time.Millisecond)
 	return
 }
+
 func ListenTls(ip string, port int, certBytes, keyBytes []byte) (ln *net.Listener, err error) {
 	var cert tls.Certificate
 	cert, err = tls.X509KeyPair(certBytes, keyBytes)
@@ -169,6 +172,7 @@ func ListenTls(ip string, port int, certBytes, keyBytes []byte) (ln *net.Listene
 	}
 	return
 }
+
 func PathExists(_path string) bool {
 	_, err := os.Stat(_path)
 	if err != nil && os.IsNotExist(err) {
@@ -176,6 +180,7 @@ func PathExists(_path string) bool {
 	}
 	return true
 }
+
 func HTTPGet(URL string, timeout int) (err error) {
 	tr := &http.Transport{}
 	var resp *http.Response
@@ -200,6 +205,7 @@ func CloseConn(conn *net.Conn) {
 		(*conn).Close()
 	}
 }
+
 func Keygen() (err error) {
 	cmd := exec.Command("sh", "-c", "openssl genrsa -out proxy.key 2048")
 	out, err := cmd.CombinedOutput()
@@ -217,6 +223,7 @@ func Keygen() (err error) {
 	fmt.Println(string(out))
 	return
 }
+
 func GetAllInterfaceAddr() ([]net.IP, error) {
 
 	ifaces, err := net.Interfaces()
@@ -261,6 +268,7 @@ func GetAllInterfaceAddr() ([]net.IP, error) {
 	//only need first
 	return addresses, nil
 }
+
 func UDPPacket(srcAddr string, packet []byte) []byte {
 	addrBytes := []byte(srcAddr)
 	addrLength := uint16(len(addrBytes))
@@ -272,6 +280,7 @@ func UDPPacket(srcAddr string, packet []byte) []byte {
 	binary.Write(pkg, binary.LittleEndian, packet)
 	return pkg.Bytes()
 }
+
 func ReadUDPPacket(conn *net.Conn) (srcAddr string, packet []byte, err error) {
 	reader := bufio.NewReader(*conn)
 	var addrLength uint16

@@ -1,11 +1,12 @@
 package secret
 
 import (
-	"github.com/feelingsray/Ray-Utils-Go/encode"
 	"github.com/tjfoc/gmsm/sm2"
+
+	"github.com/feelingsray/Ray-Utils-Go/encode"
 )
 
-func NewSecretCrypt() (*SecretCrypt,error) {
+func NewSecretCrypt() (*SecretCrypt, error) {
 	sc := new(SecretCrypt)
 	sc.privatK = `
 -----BEGIN ENCRYPTED PRIVATE KEY-----
@@ -36,32 +37,32 @@ Kuto6F8KIcLd58OoYfsfaC78E+T8kI2CS9U8jLR9X6fzGDSEGpYxEzN4Ng==
 	sc.Crypt = crypt
 	sc.PrivateKey = privateKey
 	sc.PublicKey = publicKey
-	return sc,nil
+	return sc, nil
 }
 
 type SecretCrypt struct {
-	Crypt                   *encode.SM2Crypt    // SM2加密
-	PrivateKey              *sm2.PrivateKey     // 私钥
-	PublicKey               *sm2.PublicKey      // 公钥
-	pwd                     string              // 密码
-	privatK                 string              // 私钥
-	pubK                    string              // 公钥
+	Crypt      *encode.SM2Crypt // SM2加密
+	PrivateKey *sm2.PrivateKey  // 私钥
+	PublicKey  *sm2.PublicKey   // 公钥
+	pwd        string           // 密码
+	privatK    string           // 私钥
+	pubK       string           // 公钥
 }
 
-func (s *SecretCrypt)Decrypt(raw string) (string,error) {
-	data,err := s.Crypt.Decrypt(raw,s.PrivateKey)
+func (s *SecretCrypt) Decrypt(raw string) (string, error) {
+	data, err := s.Crypt.Decrypt(raw, s.PrivateKey)
 	if err != nil {
-		return "",err
+		return "", err
 	} else {
-		return data,nil
+		return data, nil
 	}
 }
 
-func (s *SecretCrypt)Encrypt(raw string) (string,error) {
-	data,err := s.Crypt.Encrypt(raw,s.PublicKey)
+func (s *SecretCrypt) Encrypt(raw string) (string, error) {
+	data, err := s.Crypt.Encrypt(raw, s.PublicKey)
 	if err != nil {
-		return "",err
+		return "", err
 	} else {
-		return data,nil
+		return data, nil
 	}
 }
