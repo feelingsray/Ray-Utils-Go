@@ -6,12 +6,12 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/feelingsray/Ray-Utils-Go/encode"
+	"github.com/feelingsray/Ray-Utils-Go/tools/common"
 )
 
 func HttpPostWithAuth(url string, body interface{}, username string, password string) (int, string, error) {
 
-	bodyJson, err := encode.DumpJson(body)
+	bodyJson, err := common.DumpJson(body)
 	if err != nil {
 		return 500, "", err
 	}
@@ -31,7 +31,7 @@ func HttpPostWithAuth(url string, body interface{}, username string, password st
 
 func HttpPost(url string, body interface{}) (int, string, error) {
 
-	bodyJson, err := encode.DumpJson(body)
+	bodyJson, err := common.DumpJson(body)
 	if err != nil {
 		return 500, "", err
 	}
