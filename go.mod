@@ -1,20 +1,20 @@
 module github.com/feelingsray/Ray-Utils-Go
 
-go 1.17
+go 1.18
 
 require (
-	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
-	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
 	github.com/eclipse/paho.mqtt.golang v1.3.5
+	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-gonic/gin v1.7.4
 	github.com/gomodule/redigo v2.0.0+incompatible
+	github.com/ledisdb/ledisdb v0.0.0-20200510135210-d35789ec47e6
+	github.com/orcaman/concurrent-map v1.0.0
 	github.com/satori/go.uuid v1.2.0
+	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/sirupsen/logrus v1.8.1
 	github.com/tjfoc/gmsm v1.3.2
 	github.com/weekface/mgorus v0.0.0-20181029072001-239539fe10e4
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
-	golang.org/x/net v0.0.0-20201010224723-4f7140c49acb // indirect
-	golang.org/x/sys v0.0.0-20220128215802-99c3d69c2c27 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
@@ -22,13 +22,8 @@ require (
 )
 
 require (
-	github.com/gin-contrib/pprof v1.3.0
-	github.com/ledisdb/ledisdb v0.0.0-20200510135210-d35789ec47e6
-	github.com/orcaman/concurrent-map v1.0.0
-	github.com/shirou/gopsutil v3.21.11+incompatible
-)
-
-require (
+	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
+	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
 	github.com/cupcake/rdb v0.0.0-20161107195141-43ba34106c76 // indirect
 	github.com/edsrzf/mmap-go v0.0.0-20170320065105-0bce6a688712 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
@@ -54,6 +49,8 @@ require (
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/crypto v0.0.0-20201012173705-84dcc777aaee // indirect
+	golang.org/x/net v0.0.0-20201010224723-4f7140c49acb // indirect
+	golang.org/x/sys v0.0.0-20220128215802-99c3d69c2c27 // indirect
 	google.golang.org/protobuf v1.23.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200605160147-a5ece683394c // indirect
 )
