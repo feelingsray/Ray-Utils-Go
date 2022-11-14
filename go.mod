@@ -3,7 +3,6 @@ module github.com/feelingsray/Ray-Utils-Go
 go 1.18
 
 require (
-	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-gonic/gin v1.7.4
 	github.com/gomodule/redigo v2.0.0+incompatible
@@ -35,7 +34,6 @@ require (
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/golang/snappy v0.0.0-20170215233205-553a64147049 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
