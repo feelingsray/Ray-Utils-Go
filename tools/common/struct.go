@@ -1,9 +1,5 @@
 package common
 
-import (
-	"encoding/json"
-)
-
 type KMessage struct {
 	Head struct {
 		Company        string `json:"company" bson:"company"`
@@ -14,16 +10,4 @@ type KMessage struct {
 		GatewayVersion string `json:"gateway_version" bson:"gateway_version"`
 	} `json:"head" bson:"head"`
 	Body string `json:"body" bson:"body"`
-}
-
-func Struct2Map(obj any) (map[string]any, error) {
-	data, err := json.Marshal(obj)
-	if err != nil {
-		return nil, err
-	}
-	var m = make(map[string]any)
-	if err = json.Unmarshal(data, &m); err != nil {
-		return nil, err
-	}
-	return m, nil
 }
