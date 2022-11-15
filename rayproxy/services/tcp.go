@@ -34,7 +34,7 @@ func (s *TCP) StopService() {
 	}
 }
 
-func (s *TCP) Start(args interface{}) (err error) {
+func (s *TCP) Start(args any) (err error) {
 	s.cfg = args.(TCPArgs)
 	if *s.cfg.Parent != "" {
 		log.Printf("use %s parent %s", *s.cfg.ParentType, *s.cfg.Parent)
@@ -88,7 +88,7 @@ func (s *TCP) callback(inConn net.Conn) {
 
 func (s *TCP) OutToTCP(inConn *net.Conn) (err error) {
 	var outConn net.Conn
-	var _outConn interface{}
+	var _outConn any
 	_outConn, err = s.outPool.Pool.Get()
 	if err == nil {
 		outConn = _outConn.(net.Conn)

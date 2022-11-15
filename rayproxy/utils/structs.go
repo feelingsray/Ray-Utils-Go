@@ -33,9 +33,9 @@ type CheckerItem struct {
 	FailCount    uint
 }
 
-//NewChecker args:
-//timeout : tcp timeout milliseconds ,connect to host
-//interval: recheck domain interval seconds
+// NewChecker args:
+// timeout : tcp timeout milliseconds ,connect to host
+// interval: recheck domain interval seconds
 func NewChecker(timeout int, interval int64, blockedFile, directFile string) Checker {
 	ch := Checker{
 		data:     NewConcurrentMap(),
@@ -415,8 +415,8 @@ func NewOutPool(dur int, isTLS bool, certBytes, keyBytes []byte, address string,
 	}
 	var err error
 	op.Pool, err = NewConnPool(poolConfig{
-		IsActive: func(conn interface{}) bool { return true },
-		Release: func(conn interface{}) {
+		IsActive: func(conn any) bool { return true },
+		Release: func(conn any) {
 			if conn != nil {
 				conn.(net.Conn).SetDeadline(time.Now().Add(time.Millisecond))
 				conn.(net.Conn).Close()
@@ -425,7 +425,7 @@ func NewOutPool(dur int, isTLS bool, certBytes, keyBytes []byte, address string,
 		},
 		InitialCap: InitialCap,
 		MaxCap:     MaxCap,
-		Factory: func() (conn interface{}, err error) {
+		Factory: func() (conn any, err error) {
 			conn, err = op.getConn()
 			return
 		},
@@ -443,7 +443,7 @@ func NewOutPool(dur int, isTLS bool, certBytes, keyBytes []byte, address string,
 	return
 }
 
-func (op *OutPool) getConn() (conn interface{}, err error) {
+func (op *OutPool) getConn() (conn any, err error) {
 	if op.isTLS {
 		var _conn tls.Conn
 		_conn, err = TlsConnectHost(op.address, op.timeout, op.certBytes, op.keyBytes)

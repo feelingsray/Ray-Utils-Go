@@ -11,7 +11,7 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-func ReverseInterfaceArray(s []interface{}) []interface{} {
+func ReverseInterfaceArray(s []any) []any {
 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 		s[i], s[j] = s[j], s[i]
 	}
@@ -103,7 +103,7 @@ func AutoShortStr(len int) string {
 	return outChars
 }
 
-func ObjectInArray(obj interface{}, target interface{}) bool {
+func ObjectInArray(obj any, target any) bool {
 	targetValue := reflect.ValueOf(target)
 	switch reflect.TypeOf(target).Kind() {
 	case reflect.Slice, reflect.Array:

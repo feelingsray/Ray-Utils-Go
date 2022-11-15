@@ -16,14 +16,14 @@ func NewFIFOQueue() *FIFOQueue {
 	return fifoQueue
 }
 
-func (f *FIFOQueue) Enqueue(val interface{}) *list.Element {
+func (f *FIFOQueue) Enqueue(val any) *list.Element {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 	e := f.ll.PushFront(val)
 	return e
 }
 
-func (f *FIFOQueue) Dequeue() interface{} {
+func (f *FIFOQueue) Dequeue() any {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 	e := f.ll.Back()

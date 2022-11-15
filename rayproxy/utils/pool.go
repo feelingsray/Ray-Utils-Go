@@ -6,18 +6,18 @@ import (
 	"time"
 )
 
-//ConnPool to use
+// ConnPool to use
 type ConnPool interface {
-	Get() (conn interface{}, err error)
-	Put(conn interface{})
+	Get() (conn any, err error)
+	Put(conn any)
 	ReleaseAll()
 	Len() (length int)
 }
 
 type poolConfig struct {
-	Factory    func() (interface{}, error)
-	IsActive   func(interface{}) bool
-	Release    func(interface{})
+	Factory    func() (any, error)
+	IsActive   func(any) bool
+	Release    func(any)
 	InitialCap int
 	MaxCap     int
 }
@@ -25,7 +25,7 @@ type poolConfig struct {
 func NewConnPool(poolConfig poolConfig) (pool ConnPool, err error) {
 	p := netPool{
 		config: poolConfig,
-		conns:  make(chan interface{}, poolConfig.MaxCap),
+		conns:  make(chan any, poolConfig.MaxCap),
 		lock:   &sync.Mutex{},
 	}
 	//log.Printf("pool MaxCap:%d", poolConfig.MaxCap)
@@ -39,7 +39,7 @@ func NewConnPool(poolConfig poolConfig) (pool ConnPool, err error) {
 }
 
 type netPool struct {
-	conns  chan interface{}
+	conns  chan any
 	lock   *sync.Mutex
 	config poolConfig
 }
@@ -92,7 +92,7 @@ func (p *netPool) initAutoFill(async bool) (err error) {
 
 }
 
-func (p *netPool) Get() (conn interface{}, err error) {
+func (p *netPool) Get() (conn any, err error) {
 	// defer func() {
 	// 	log.Printf("pool len : %d", p.Len())
 	// }()
@@ -116,7 +116,7 @@ func (p *netPool) Get() (conn interface{}, err error) {
 	return
 }
 
-func (p *netPool) Put(conn interface{}) {
+func (p *netPool) Put(conn any) {
 	if conn == nil {
 		return
 	}
@@ -139,7 +139,7 @@ func (p *netPool) ReleaseAll() {
 	for c := range p.conns {
 		p.config.Release(c)
 	}
-	p.conns = make(chan interface{}, p.config.InitialCap)
+	p.conns = make(chan any, p.config.InitialCap)
 
 }
 

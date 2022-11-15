@@ -7,9 +7,9 @@ import (
 )
 
 /*
-	载入yaml格式文件并解析
+载入yaml格式文件并解析
 */
-func LoadYaml(path string, out interface{}) error {
+func LoadYaml(path string, out any) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err

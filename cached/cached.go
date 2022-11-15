@@ -10,7 +10,7 @@ type LRUCache struct {
 
 type entry struct {
 	key   string
-	value interface{}
+	value any
 }
 
 func NewLRUCache() *LRUCache {
@@ -20,7 +20,7 @@ func NewLRUCache() *LRUCache {
 }
 
 // Set 函数添加一个缓存项到Cache对象中
-func (c *LRUCache) Set(key string, value interface{}) {
+func (c *LRUCache) Set(key string, value any) {
 	if c.cache == nil {
 		c.cache = make(map[string]*list.Element)
 		c.ll = list.New()
@@ -38,7 +38,7 @@ func (c *LRUCache) Set(key string, value interface{}) {
 }
 
 // Get 方法获取具有指定键的缓存项
-func (c *LRUCache) GetEx(key string) (value interface{}, ok bool) {
+func (c *LRUCache) GetEx(key string) (value any, ok bool) {
 	if c.cache == nil {
 		return
 	}
@@ -50,7 +50,7 @@ func (c *LRUCache) GetEx(key string) (value interface{}, ok bool) {
 }
 
 // Get 方法获取具有指定键的缓存项
-func (c *LRUCache) Get(key string) interface{} {
+func (c *LRUCache) Get(key string) any {
 	if c.cache == nil {
 		return nil
 	}
@@ -113,8 +113,8 @@ func (c *LRUCache) GetKeys() []string {
 	return keys
 }
 
-func (c *LRUCache) GetAll() map[string]interface{} {
-	data := make(map[string]interface{})
+func (c *LRUCache) GetAll() map[string]any {
+	data := make(map[string]any)
 	for k, v := range c.cache {
 		data[k] = v.Value.(*entry).value
 	}

@@ -7,19 +7,19 @@ import (
 )
 
 type Service interface {
-	Start(args interface{}) (err error)
+	Start(args any) (err error)
 	Clean()
 }
 
 type ServiceItem struct {
 	S    Service
-	Args interface{}
+	Args any
 	Name string
 }
 
 var servicesMap = map[string]*ServiceItem{}
 
-func Regist(name string, s Service, args interface{}) {
+func Regist(name string, s Service, args any) {
 	servicesMap[name] = &ServiceItem{
 		S:    s,
 		Args: args,

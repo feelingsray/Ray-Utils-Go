@@ -9,7 +9,7 @@ import (
 	"github.com/feelingsray/Ray-Utils-Go/tools/common"
 )
 
-func HttpPostWithAuth(url string, body interface{}, username string, password string) (int, string, error) {
+func HttpPostWithAuth(url string, body any, username string, password string) (int, string, error) {
 
 	bodyJson, err := common.DumpJson(body)
 	if err != nil {
@@ -29,7 +29,7 @@ func HttpPostWithAuth(url string, body interface{}, username string, password st
 
 }
 
-func HttpPost(url string, body interface{}) (int, string, error) {
+func HttpPost(url string, body any) (int, string, error) {
 
 	bodyJson, err := common.DumpJson(body)
 	if err != nil {
