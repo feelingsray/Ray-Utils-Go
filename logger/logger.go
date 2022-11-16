@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/weekface/mgorus"
 	"gopkg.in/mgo.v2"
 
 	"github.com/feelingsray/Ray-Utils-Go/tools"
+	"github.com/lestrrat-go/file-rotatelogs"
 )
 
 const (
@@ -24,6 +26,31 @@ func LoggerConsoleHandle(level logrus.Level) *logrus.Logger {
 	logger := logrus.New()
 	logger.SetLevel(level)
 	return logger
+}
+
+func LoggerMultifileHandle(dir string, name string, level logrus.Level) (*logrus.Logger, error) {
+	// 判断文件夹是否存在,
+	isExist, err := tools.PathExists(dir)
+	if err != nil {
+		return nil, err
+	}
+	if !isExist {
+		err := os.Mkdir(dir, os.ModePerm)
+		if err != nil {
+			return nil, err
+		}
+	}
+	path := dir + name
+	logs, _ := rotatelogs.New(fmt.Sprintf("%s%s", path, ".%Y%m%d%H"),
+		rotatelogs.WithLinkName(path),
+		rotatelogs.WithMaxAge(24*time.Hour),
+		rotatelogs.WithRotationTime(time.Hour),
+	)
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.JSONFormatter{})
+	logger.SetLevel(level)
+	logger.SetOutput(logs)
+	return logger, nil
 }
 
 // 文本输出
