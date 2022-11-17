@@ -928,6 +928,9 @@ func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS
 		p.engRouter.GET("/", func(c *gin.Context) {
 			c.Redirect(http.StatusMovedPermanently, "/ui")
 		})
+		p.engRouter.NoRoute(func(c *gin.Context) {
+			c.FileFromFS("index.html", http.FS(fs))
+		})
 	}
 
 	// 源数据文件下载路径
