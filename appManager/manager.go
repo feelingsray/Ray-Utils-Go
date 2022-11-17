@@ -1,12 +1,15 @@
 package appManager
 
 import (
+	"bufio"
 	"bytes"
 	"embed"
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
+	"net/url"
 	"os/exec"
 	"path"
 	"regexp"
@@ -898,7 +901,7 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 /*********************** 主方法 *****************/
 
 // Manager 主入口服务
-func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS) {
+func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS, proxies map[string][]string) {
 	p.SysLogger.Infof("启动Manager框架......")
 	// 跨域
 	p.engRouter.Use(p.cors())
@@ -944,6 +947,38 @@ func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS
 		c.JSON(200, version)
 		return
 	})
+
+	for addr, proxy := range proxies {
+		for _, relativePath := range proxy {
+			_ = relativePath
+			group := p.engRouter.Group(relativePath)
+			group.Any("/*action", func(c *gin.Context) {
+				req := c.Request
+				parse, err := url.Parse(addr)
+				if err != nil {
+					log.Printf("error in parse addr: %v", err)
+					c.String(500, fmt.Sprintf("error in parse addr: %v", err))
+					return
+				}
+				req.URL.Scheme = parse.Scheme
+				req.URL.Host = parse.Host
+				transport := http.DefaultTransport
+				resp, err := transport.RoundTrip(req)
+				if err != nil {
+					c.String(500, fmt.Sprintf("error in roundtrip: %v", err))
+					return
+				}
+				for k, vv := range resp.Header {
+					for _, v := range vv {
+						c.Header(k, v)
+					}
+				}
+				defer resp.Body.Close()
+				bufio.NewReader(resp.Body).WriteTo(c.Writer)
+				return
+			})
+		}
+	}
 
 	mapi := p.engRouter.Group("/mapi/")
 	mapi.GET("/version/", func(c *gin.Context) {
