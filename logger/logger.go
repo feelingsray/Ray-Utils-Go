@@ -35,7 +35,7 @@ func LoggerMultifileHandle(dir string, name string, level logrus.Level) (*logrus
 		return nil, err
 	}
 	if !isExist {
-		err := os.Mkdir(dir, os.ModePerm)
+		err := os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
 			return nil, err
 		}
