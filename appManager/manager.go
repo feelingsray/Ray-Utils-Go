@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"sort"
@@ -90,7 +91,7 @@ func NewAppManager(appCode string, port int, registerApi RegisterManagerApi,
 	manager.SuperAuth = SuperAuth
 	manager.firstRun = true
 	manager.AppCode = appCode
-	if port < 3000 {
+	if port < 3000 && port != 443 && port != 80 {
 		port = 8888
 	}
 	manager.port = port
@@ -900,7 +901,7 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 /*********************** 主方法 *****************/
 
 // Manager 主入口服务
-func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS, proxies map[string][]string) {
+func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS, proxies map[string][]string, https bool, dir string) {
 	p.SysLogger.Infof("启动Manager框架......")
 	// 跨域
 	p.engRouter.Use(p.cors())
@@ -1016,7 +1017,6 @@ func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS
 	mapi.GET("/extProc/list/", p.getExtProcListApi)
 	// 注入外部managerAPI接口
 	p.registerManagerApi(mapi)
-
 	server := &http.Server{
 		Addr:           fmt.Sprintf(":%d", p.port),
 		Handler:        p.engRouter,
@@ -1024,8 +1024,15 @@ func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS
 		WriteTimeout:   90 * time.Second,
 		MaxHeaderBytes: 1 << 20, // 2的20次方
 	}
-	if err := server.ListenAndServe(); err != nil {
-		p.SysLogger.Errorf("Manager框架监听错误:%s", err.Error())
-		fmt.Println(err.Error())
+	if https {
+		certFile := filepath.Join(dir, "server.crt")
+		keyFile := filepath.Join(dir, "server.key")
+		if err := server.ListenAndServeTLS(certFile, keyFile); err != nil {
+			p.SysLogger.Errorf("Manager框架监听错误:%s", err.Error())
+		}
+	} else {
+		if err := server.ListenAndServe(); err != nil {
+			p.SysLogger.Errorf("Manager框架监听错误:%s", err.Error())
+		}
 	}
 }
