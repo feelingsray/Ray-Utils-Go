@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"os/exec"
@@ -945,21 +944,17 @@ func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS
 		// 加载静态页面
 		p.engRouter.StaticFS("/dl", http.Dir(dlPath))
 	}
-
 	p.engRouter.GET("/version/", func(c *gin.Context) {
 		c.JSON(200, version)
 		return
 	})
-
 	for addr, proxy := range proxies {
 		for _, relativePath := range proxy {
-			_ = relativePath
 			group := p.engRouter.Group(relativePath)
 			group.Any("/*action", func(c *gin.Context) {
 				req := c.Request
 				parse, err := url.Parse(addr)
 				if err != nil {
-					log.Printf("error in parse addr: %v", err)
 					c.String(500, fmt.Sprintf("error in parse addr: %v", err))
 					return
 				}
@@ -982,7 +977,6 @@ func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS
 			})
 		}
 	}
-
 	mapi := p.engRouter.Group("/mapi/")
 	mapi.GET("/version/", func(c *gin.Context) {
 		mapiVersion := make(map[string]any, 0)
