@@ -40,7 +40,7 @@ func LoggerMultifileHandle(dir string, name string, level logrus.Level) (*logrus
 			return nil, err
 		}
 	}
-	path := dir + name
+	path := filepath.Join(dir, name)
 	logs, _ := rotatelogs.New(fmt.Sprintf("%s%s", path, ".%Y%m%d%H"),
 		rotatelogs.WithLinkName(path),
 		rotatelogs.WithMaxAge(24*time.Hour),
