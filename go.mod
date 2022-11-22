@@ -9,7 +9,7 @@ require (
 	github.com/ledisdb/ledisdb v0.0.0-20200510135210-d35789ec47e6
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/orcaman/concurrent-map v1.0.0
-	github.com/satori/go.uuid v1.2.0
+	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/sirupsen/logrus v1.8.1
 	github.com/tjfoc/gmsm v1.3.2
@@ -43,6 +43,7 @@ require (
 	github.com/pelletier/go-toml v1.0.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/siddontang/go v0.0.0-20170517070808-cb568a3e5cc0 // indirect
 	github.com/siddontang/rdb v0.0.0-20150307021120-fc89ed2e418d // indirect
 	github.com/syndtr/goleveldb v0.0.0-20160425020131-cfa635847112 // indirect
