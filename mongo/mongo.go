@@ -21,7 +21,7 @@ func NewMongoStore(host []string, username string, password string) *MongoStore 
 		User:      username,
 		Pwd:       password,
 		PoolLimit: 4096,
-		Timeout:   time.Duration(69 * time.Second),
+		Timeout:   20 * time.Second,
 		Session:   nil,
 	}
 	return &m
