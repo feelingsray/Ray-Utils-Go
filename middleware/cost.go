@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/json-iterator/go"
+	"github.com/tidwall/sjson"
 )
 
 const (
@@ -28,11 +28,8 @@ func Cost() gin.HandlerFunc {
 		}
 		data := wb.Body.Bytes()
 		wb.Body.Reset()
-		m := make(map[string]any, 0)
-		_ = jsoniter.Unmarshal(data, &m)
-		m["cost"] = time.Since(start).Milliseconds()
-		marshal, _ := jsoniter.Marshal(m)
-		wb.Body.Write(marshal)
+		body, _ := sjson.SetBytes(data, "cost", time.Since(start).Milliseconds())
+		wb.Body.Write(body)
 		wb.Flush()
 	}
 }
