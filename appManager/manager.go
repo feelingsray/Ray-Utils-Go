@@ -85,7 +85,7 @@ type ExtProc struct {
 
 // NewAppManager 初始化一个管理对象
 func NewAppManager(appCode string, port int, registerApi RegisterManagerApi,
-	initCallBack AppInitCallBack, doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack, sysDir string) (*AppManager, error) {
+	initCallBack AppInitCallBack, doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack, sysDir string, debug bool) (*AppManager, error) {
 
 	manager := new(AppManager)
 	manager.SuperAuth = SuperAuth
@@ -97,10 +97,14 @@ func NewAppManager(appCode string, port int, registerApi RegisterManagerApi,
 	manager.port = port
 	manager.procStore = cmap.New()
 	manager.extProcStore = cmap.New()
-	gin.SetMode(gin.DebugMode)
 	manager.engRouter = gin.New()
-	manager.engRouter.Use(gin.Logger())
-	manager.engRouter.Use(gin.Recovery())
+	if debug {
+		gin.SetMode(gin.DebugMode)
+		manager.engRouter.Use(gin.Logger())
+		manager.engRouter.Use(gin.Recovery())
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	manager.registerManagerApi = registerApi
 	manager.initCallBack = initCallBack
 	manager.doCallBack = doCallBack
