@@ -84,9 +84,8 @@ type ExtProc struct {
 }
 
 // NewAppManager 初始化一个管理对象
-func NewAppManager(appCode string, port int, registerApi RegisterManagerApi,
-	initCallBack AppInitCallBack, doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack, sysDir string, debug bool) (*AppManager, error) {
-
+func NewAppManager(appCode string, port int, registerApi RegisterManagerApi, initCallBack AppInitCallBack,
+	doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack, sysDir string, debug bool) (*AppManager, error) {
 	manager := new(AppManager)
 	manager.SuperAuth = SuperAuth
 	manager.firstRun = true
@@ -325,7 +324,7 @@ func (p *AppManager) RestartProcAfterInit() error {
 		time.Sleep(10 * time.Second)
 	}
 	// 阻塞判断是否停止成功
-	for key, _ := range p.procStore.Items() {
+	for key := range p.procStore.Items() {
 		for {
 			proc, exist := p.procStore.Get(key)
 			if exist && proc.(*Proc).Status == ProcClosed {
