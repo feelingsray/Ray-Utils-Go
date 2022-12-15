@@ -3,7 +3,6 @@ package httpHelper
 import (
   "bytes"
   "io"
-  "io/ioutil"
   "net/http"
   
   "github.com/feelingsray/Ray-Utils-Go/encode"
@@ -24,7 +23,7 @@ func HttpPostWithAuth(url string, body any, username string, password string) (i
     return 500, "", err
   }
   defer resp.Body.Close()
-  respBody, _ := ioutil.ReadAll(resp.Body)
+  respBody, _ := io.ReadAll(resp.Body)
   return resp.StatusCode, string(respBody), nil
   
 }
@@ -44,7 +43,7 @@ func HttpPost(url string, body any) (int, string, error) {
     return 500, "", err
   }
   defer resp.Body.Close()
-  respBody, _ := ioutil.ReadAll(resp.Body)
+  respBody, _ := io.ReadAll(resp.Body)
   return resp.StatusCode, string(respBody), nil
   
 }
