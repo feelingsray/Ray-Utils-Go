@@ -7,6 +7,7 @@ import (
   "encoding/base64"
   "errors"
   "fmt"
+  "log"
   "net/http"
   "net/url"
   "os/exec"
@@ -29,10 +30,8 @@ import (
   "github.com/shirou/gopsutil/load"
   "github.com/shirou/gopsutil/mem"
   "github.com/shirou/gopsutil/process"
-  "github.com/sirupsen/logrus"
   
   "github.com/feelingsray/Ray-Utils-Go/encode"
-  "github.com/feelingsray/Ray-Utils-Go/logger"
   "github.com/feelingsray/Ray-Utils-Go/nethelper"
   "github.com/feelingsray/Ray-Utils-Go/rotp"
   "github.com/feelingsray/Ray-Utils-Go/tools"
@@ -117,32 +116,13 @@ func NewAppManager(appCode string, port int, registerApi RegisterManagerApi, ini
   }
   amInfo.AppDir = tools.GetAppPath()
   manager.ManagerInfo = amInfo
-  logExist, _ := tools.PathExists(path.Join(amInfo.SysDir, appCode, "logs"))
-  if !logExist {
-    err := tools.CreateDir(path.Join(amInfo.SysDir, appCode, "logs"))
-    if err != nil {
-      return nil, err
-    }
-  }
-  level := logrus.DebugLevel
-  sysLog, err := logger.LoggerFileHandle(path.Join(amInfo.SysDir, appCode, "logs"), "sys", level)
-  if err != nil {
-    return nil, errors.New(fmt.Sprintf("创建系统日志失败:%s", err.Error()))
-  }
-  manager.SysLogger = sysLog
-  appLog, err := logger.LoggerFileHandle(path.Join(amInfo.SysDir, appCode, "logs"), "app", level)
-  if err != nil {
-    return nil, errors.New(fmt.Sprintf("创建应用日志失败:%s", err.Error()))
-  }
-  manager.AppLogger = appLog
-  // 系统配置缓存
   cachedCfg := config.NewConfigDefault()
   cachedCfg.DataDir = path.Join(amInfo.SysDir, appCode, "cached")
-  manager.AppCachedStorm, err = ledis.Open(cachedCfg)
+  ledisDb, err := ledis.Open(cachedCfg)
   if err != nil {
     return nil, errors.New(fmt.Sprintf("创建缓存失败:%s", err.Error()))
   }
-  manager.AppCached, err = manager.AppCachedStorm.Select(0)
+  manager.AppCached, err = ledisDb.Select(0)
   if err != nil {
     return nil, errors.New(fmt.Sprintf("初始化缓存失败:%s", err.Error()))
   }
@@ -177,9 +157,6 @@ type AppManager struct {
   doCallBack         AppDoCallBack
   destroyCallBack    AppDestroyCallBack
   ManagerInfo        *AMInfo
-  SysLogger          *logrus.Logger // 系统日志
-  AppLogger          *logrus.Logger // 应用日志
-  AppCachedStorm     *ledis.Ledis
   AppCached          *ledis.DB
   SuperAuth          map[string]string
 }
@@ -791,13 +768,7 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
       psInfo["cpu_core"] = cpuCore
       psInfo["cpu_type"] = cpuInfo[0].ModelName
     }
-  } else {
-    // 使用Apple M1芯片
-    //cores, _ := unix.SysctlUint32("machdep.cpu.core_count")
-    //psInfo["cpu_core"] = int32(cores)
-    //psInfo["cpu_type"], _ = unix.Sysctl("machdep.cpu.brand_string")
   }
-  // 获取物理内存使用率
   psInfo["mem"] = 0
   memV, err := mem.VirtualMemory()
   if memV != nil && err == nil {
@@ -904,12 +875,8 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 
 // Manager 主入口服务
 func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS, proxies map[string][]string, https bool, dir string) {
-  p.SysLogger.Infof("启动Manager框架......")
-  // 跨域
   p.engRouter.Use(p.cors())
-  // 性能工具
   pprof.Register(p.engRouter)
-  
   if webPath != "" {
     if ok, _ := tools.PathExists(webPath); ok {
       // 加载静态页面
@@ -1030,11 +997,11 @@ func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS
     certFile := filepath.Join(dir, "server.crt")
     keyFile := filepath.Join(dir, "server.key")
     if err = server.ListenAndServeTLS(certFile, keyFile); err != nil {
-      p.SysLogger.Errorf("Manager框架监听错误:%s", err.Error())
+      log.Fatalf("Manager框架监听错误:%s", err.Error())
     }
   } else {
     if err = server.ListenAndServe(); err != nil {
-      p.SysLogger.Errorf("Manager框架监听错误:%s", err.Error())
+      log.Fatalf("Manager框架监听错误:%s", err.Error())
     }
   }
 }

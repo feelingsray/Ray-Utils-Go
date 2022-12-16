@@ -9,7 +9,6 @@ import (
 )
 
 func HttpPostWithAuth(url string, body any, username string, password string) (int, string, error) {
-  
   bodyJson, err := encode.DumpJson(body)
   if err != nil {
     return 500, "", err
@@ -29,7 +28,6 @@ func HttpPostWithAuth(url string, body any, username string, password string) (i
 }
 
 func HttpPost(url string, body any) (int, string, error) {
-  
   bodyJson, err := encode.DumpJson(body)
   if err != nil {
     return 500, "", err
