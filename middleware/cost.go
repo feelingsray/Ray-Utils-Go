@@ -17,7 +17,6 @@ const (
   defaultStatus = 200
 )
 
-// Cost 接口耗时统计中间件
 func Cost() gin.HandlerFunc {
   return func(c *gin.Context) {
     if strings.Contains(c.Request.URL.Path, "download") {

@@ -24,7 +24,7 @@ import (
   "github.com/gin-gonic/gin"
   "github.com/ledisdb/ledisdb/config"
   "github.com/ledisdb/ledisdb/ledis"
-  "github.com/orcaman/concurrent-map"
+  "github.com/orcaman/concurrent-map/v2"
   "github.com/shirou/gopsutil/cpu"
   "github.com/shirou/gopsutil/disk"
   "github.com/shirou/gopsutil/load"
@@ -32,7 +32,7 @@ import (
   "github.com/shirou/gopsutil/process"
   
   "github.com/feelingsray/Ray-Utils-Go/encode"
-  "github.com/feelingsray/Ray-Utils-Go/nethelper"
+  "github.com/feelingsray/Ray-Utils-Go/netHelper"
   "github.com/feelingsray/Ray-Utils-Go/rotp"
   "github.com/feelingsray/Ray-Utils-Go/tools"
 )
@@ -93,8 +93,8 @@ func NewAppManager(appCode string, port int, registerApi RegisterManagerApi, ini
     port = 8888
   }
   manager.port = port
-  manager.procStore = cmap.New()
-  manager.extProcStore = cmap.New()
+  manager.procStore = cmap.New[*Proc]()
+  manager.extProcStore = cmap.New[*ExtProc]()
   manager.engRouter = gin.New()
   if debug {
     gin.SetMode(gin.DebugMode)
@@ -148,8 +148,8 @@ type AMInfo struct {
 type AppManager struct {
   AppCode            string
   firstRun           bool
-  procStore          cmap.ConcurrentMap
-  extProcStore       cmap.ConcurrentMap
+  procStore          cmap.ConcurrentMap[string, *Proc]
+  extProcStore       cmap.ConcurrentMap[string, *ExtProc]
   engRouter          *gin.Engine
   port               int
   registerManagerApi RegisterManagerApi
@@ -196,7 +196,7 @@ func (p *AppManager) SetProcStatus(code string, status ProcStat) error {
   if !exist {
     return errors.New(fmt.Sprintf("未注册服务:%s", code))
   } else {
-    proc := old.(*Proc)
+    proc := old
     proc.Status = status
     if status == ProcRun {
       proc.StartTime = time.Now().Unix()
@@ -211,7 +211,7 @@ func (p *AppManager) SetProcHeartTime(code string) error {
   if !exist {
     return errors.New(fmt.Sprintf("未注册服务:%s", code))
   } else {
-    proc := old.(*Proc)
+    proc := old
     proc.HeartTime = time.Now().Unix()
     return nil
   }
@@ -223,7 +223,7 @@ func (p *AppManager) GetProcStatusByCode(code string) ProcStat {
   if !exist {
     return ProcUnknown
   } else {
-    return old.(*Proc).Status
+    return old.Status
   }
 }
 
@@ -231,7 +231,7 @@ func (p *AppManager) GetProcStatusByCode(code string) ProcStat {
 func (p *AppManager) GetProcStatus() map[string]*Proc {
   serviceList := make(map[string]*Proc, 0)
   for key, value := range p.procStore.Items() {
-    serviceList[key] = value.(*Proc)
+    serviceList[key] = value
   }
   return serviceList
 }
@@ -252,7 +252,7 @@ func (p *AppManager) RestartProcByCode(code string) (*Proc, error) {
   if !exist {
     return nil, errors.New("此内部服务未注册:" + code)
   } else {
-    proc := oldProc.(*Proc)
+    proc := oldProc
     if proc.Status != ProcClosed {
       proc.Status = ProcStop
       p.procStore.Set(code, proc)
@@ -261,20 +261,20 @@ func (p *AppManager) RestartProcByCode(code string) (*Proc, error) {
   time.Sleep(100 * time.Millisecond)
   for {
     proc, exist := p.procStore.Get(code)
-    if exist && proc.(*Proc).Status == ProcClosed {
+    if exist && proc.Status == ProcClosed {
       p.doCallBack(code, p)
       break
     }
   }
   newProc, _ := p.procStore.Get(code)
-  return newProc.(*Proc), nil
+  return newProc, nil
 }
 
 // StopProcByCode 根据编码停止内部服务
 func (p *AppManager) StopProcByCode(code string) {
   proc, exist := p.procStore.Get(code)
   if exist {
-    stopProc := proc.(*Proc)
+    stopProc := proc
     if stopProc.Status == ProcRun {
       stopProc.Status = ProcStop
       p.procStore.Set(code, stopProc)
@@ -293,7 +293,7 @@ func (p *AppManager) RestartProcAfterInit() error {
         oldProc.Status = ProcStop
         p.procStore.Set(code, oldProc)
       }
-    }(key, value.(*Proc))
+    }(key, value)
   }
   // 初次执行的时候，不需要等待gin退出
   if !p.firstRun {
@@ -303,7 +303,7 @@ func (p *AppManager) RestartProcAfterInit() error {
   for key := range p.procStore.Items() {
     for {
       proc, exist := p.procStore.Get(key)
-      if exist && proc.(*Proc).Status == ProcClosed {
+      if exist && proc.Status == ProcClosed {
         break
       }
       time.Sleep(1 * time.Millisecond)
@@ -331,7 +331,7 @@ func (p *AppManager) RestartProcAfterInit() error {
   for key, value := range p.procStore.Items() {
     go func(key string, value *Proc) {
       p.doCallBack(key, p)
-    }(key, value.(*Proc))
+    }(key, value)
   }
   return nil
 }
@@ -360,7 +360,7 @@ func (p *AppManager) SetExtProcStatus(code string, status ProcStat) error {
   if !exist {
     return errors.New(fmt.Sprintf("未注册的外部服务:%s", code))
   } else {
-    proc := old.(*ExtProc)
+    proc := old
     proc.Status = status
     proc.StartTime = time.Now().Unix()
     p.extProcStore.Set(code, proc)
@@ -374,7 +374,7 @@ func (p *AppManager) CheckExtProcByCode(code string) error {
   if !exist {
     return errors.New(fmt.Sprintf("未注册的外部服务:%s", code))
   }
-  proc := procObj.(*ExtProc)
+  proc := procObj
   cmd := exec.Command("bash", "-c", fmt.Sprintf("ps -ef|grep '%s'|grep -v grep|awk '{print $2}' ", proc.Cmd))
   pidByte, err := cmd.Output()
   if err != nil {
@@ -406,7 +406,7 @@ func (p *AppManager) StartExtProcByCode(code string) error {
   if !exist {
     return errors.New(fmt.Sprintf("未注册的外部服务:%s", code))
   }
-  proc := procObj.(*ExtProc)
+  proc := procObj
   cmdStr := proc.Cmd
   if proc.Sudo {
     cmdStr = fmt.Sprintf("sudo %s", cmdStr)
@@ -436,7 +436,7 @@ func (p *AppManager) StopExtProcByCode(code string) error {
   if !exist {
     return errors.New(fmt.Sprintf("未注册的外部服务:%s", code))
   }
-  proc := procObj.(*ExtProc)
+  proc := procObj
   if proc.PID != "" && proc.Status == ProcRun {
     cmdStr := fmt.Sprintf("sudo kill -9 %s", proc.PID)
     args := strings.Split(cmdStr, " ")
@@ -464,7 +464,7 @@ func (p *AppManager) StopExtProcByCode(code string) error {
 func (p *AppManager) ExtProcManager() {
   for key, value := range p.extProcStore.Items() {
     code := key
-    proc := value.(*ExtProc)
+    proc := value
     // 检查进程是否存在
     _ = p.CheckExtProcByCode(code)
     // 重启尝试
@@ -517,7 +517,7 @@ func (p *AppManager) getProcListApi(c *gin.Context) {
   data := make(map[string]any)
   serviceList := make(map[string]*Proc)
   for key, value := range p.procStore.Items() {
-    serviceList[key] = value.(*Proc)
+    serviceList[key] = value
   }
   data["proc_list"] = serviceList
   data["proc_count"] = runtime.NumGoroutine()
@@ -559,7 +559,7 @@ func (p *AppManager) deleteProcApi(c *gin.Context) {
 func (p *AppManager) getExtProcListApi(c *gin.Context) {
   serviceList := make(map[string]*ExtProc)
   for key, value := range p.extProcStore.Items() {
-    serviceList[key] = value.(*ExtProc)
+    serviceList[key] = value
   }
   c.JSON(200, serviceList)
   return
@@ -793,7 +793,7 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
   psInfo["ip"] = ""
   ip := ""
   for _, n := range []string{"en0", "eth0", "ens0", "ens33", "em0", "ens0", "en1", "eth1", "enss1", "em1", "ens1", "en2", "eth2", "enss2", "em2", "ens2", "ifcfg-ens33"} {
-    ip = nethelper.GetIPAddressByName(n)
+    ip = netHelper.GetIPAddressByName(n)
     match, _ := regexp.MatchString(`^127\.0\.0\.1$`, ip)
     if !match {
       break

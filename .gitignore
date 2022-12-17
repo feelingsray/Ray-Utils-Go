@@ -18,6 +18,6 @@ vendor/*
 .idea/*
 */.idea/*
 *.DS_Store
-autoupdate/client/release/demo/release_1.0.0/._install.sh
+autoUpdate/client/release/demo/release_1.0.0/install.sh
 
 vendor
