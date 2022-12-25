@@ -7,7 +7,6 @@ import (
   "time"
   
   "github.com/lestrrat-go/file-rotatelogs"
-  "github.com/rifflock/lfshook"
   "github.com/sirupsen/logrus"
   
   "github.com/feelingsray/Ray-Utils-Go/tools"
@@ -49,11 +48,11 @@ func MultiFileHandle(dir, name string, level logrus.Level) (*logrus.Logger, erro
     rotatelogs.WithMaxAge(24*time.Hour),
     rotatelogs.WithRotationTime(time.Hour),
   )
-  hook := lfshook.NewHook(lfshook.WriterMap{
-    logrus.InfoLevel:  logs,
-    logrus.DebugLevel: logs,
-    logrus.WarnLevel:  wfLogs,
-    logrus.ErrorLevel: wfLogs,
+  hook := NewHook(WriterMap{
+    InfoLevel:  logs,
+    DebugLevel: logs,
+    WarnLevel:  wfLogs,
+    ErrorLevel: wfLogs,
   }, &logrus.JSONFormatter{})
   logger := logrus.New()
   logger.AddHook(hook)
