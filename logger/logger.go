@@ -7,6 +7,7 @@ import (
   "time"
   
   "github.com/lestrrat-go/file-rotatelogs"
+  "github.com/rifflock/lfshook"
   "github.com/sirupsen/logrus"
   
   "github.com/feelingsray/Ray-Utils-Go/tools"
@@ -15,8 +16,8 @@ import (
 const (
   DebugLevel = logrus.DebugLevel
   InfoLevel  = logrus.InfoLevel
-  ErrorLevel = logrus.ErrorLevel
   WarnLevel  = logrus.WarnLevel
+  ErrorLevel = logrus.ErrorLevel
 )
 
 func ConsoleHandle(level logrus.Level) *logrus.Logger {
@@ -41,9 +42,21 @@ func MultiFileHandle(dir, name string, level logrus.Level) (*logrus.Logger, erro
     rotatelogs.WithMaxAge(24*time.Hour),
     rotatelogs.WithRotationTime(time.Hour),
   )
+  wfName := fmt.Sprintf("%s.wf", name)
+  wfPath := filepath.Join(dir, wfName)
+  wfLogs, _ := rotatelogs.New(fmt.Sprintf("%s%s", wfPath, ".%Y%m%d%H"),
+    rotatelogs.WithLinkName(wfPath),
+    rotatelogs.WithMaxAge(24*time.Hour),
+    rotatelogs.WithRotationTime(time.Hour),
+  )
+  hook := lfshook.NewHook(lfshook.WriterMap{
+    logrus.InfoLevel:  logs,
+    logrus.DebugLevel: logs,
+    logrus.WarnLevel:  wfLogs,
+    logrus.ErrorLevel: wfLogs,
+  }, &logrus.JSONFormatter{})
   logger := logrus.New()
-  logger.SetFormatter(&logrus.JSONFormatter{})
+  logger.AddHook(hook)
   logger.SetLevel(level)
-  logger.SetOutput(logs)
   return logger, nil
 }
