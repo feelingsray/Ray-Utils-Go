@@ -95,7 +95,6 @@ func NewAppManager(appCode string, port int, registerApi RegisterManagerApi, ini
     manager.port = port
     manager.procStore = cmap.New[*Proc]()
     manager.extProcStore = cmap.New[*ExtProc]()
-    manager.engRouter = gin.New()
     if debug {
         gin.SetMode(gin.DebugMode)
         manager.engRouter.Use(gin.Logger())
@@ -103,6 +102,7 @@ func NewAppManager(appCode string, port int, registerApi RegisterManagerApi, ini
     } else {
         gin.SetMode(gin.ReleaseMode)
     }
+    manager.engRouter = gin.New()
     manager.registerManagerApi = registerApi
     manager.initCallBack = initCallBack
     manager.doCallBack = doCallBack
