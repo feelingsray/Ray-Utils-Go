@@ -120,11 +120,11 @@ func NewAppManager(appCode string, port int, registerApi RegisterManagerApi, ini
 	cachedCfg.DataDir = path.Join(amInfo.SysDir, appCode, "cached")
 	ledisDb, err := ledis.Open(cachedCfg)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("创建缓存失败:%s", err.Error()))
+		return nil, fmt.Errorf("创建缓存失败:%s", err.Error())
 	}
 	manager.AppCached, err = ledisDb.Select(0)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("初始化缓存失败:%s", err.Error()))
+		return nil, fmt.Errorf("初始化缓存失败:%s", err.Error())
 	}
 	return manager, nil
 }
@@ -194,7 +194,7 @@ func (p *AppManager) DeleteProc(code string) error {
 func (p *AppManager) SetProcStatus(code string, status ProcStat) error {
 	old, exist := p.procStore.Get(code)
 	if !exist {
-		return errors.New(fmt.Sprintf("未注册服务:%s", code))
+		return fmt.Errorf("未注册服务:%s", code)
 	} else {
 		proc := old
 		proc.Status = status
@@ -209,7 +209,7 @@ func (p *AppManager) SetProcStatus(code string, status ProcStat) error {
 func (p *AppManager) SetProcHeartTime(code string) error {
 	old, exist := p.procStore.Get(code)
 	if !exist {
-		return errors.New(fmt.Sprintf("未注册服务:%s", code))
+		return fmt.Errorf("未注册服务:%s", code)
 	} else {
 		proc := old
 		proc.HeartTime = time.Now().Unix()
@@ -358,7 +358,7 @@ func (p *AppManager) RegisterExtProc(code string, name string, cmd string, alway
 func (p *AppManager) SetExtProcStatus(code string, status ProcStat) error {
 	old, exist := p.extProcStore.Get(code)
 	if !exist {
-		return errors.New(fmt.Sprintf("未注册的外部服务:%s", code))
+		return fmt.Errorf("未注册的外部服务:%s", code)
 	} else {
 		proc := old
 		proc.Status = status
@@ -372,7 +372,7 @@ func (p *AppManager) SetExtProcStatus(code string, status ProcStat) error {
 func (p *AppManager) CheckExtProcByCode(code string) error {
 	procObj, exist := p.extProcStore.Get(code)
 	if !exist {
-		return errors.New(fmt.Sprintf("未注册的外部服务:%s", code))
+		return fmt.Errorf("未注册的外部服务:%s", code)
 	}
 	proc := procObj
 	cmd := exec.Command("bash", "-c", fmt.Sprintf("ps -ef|grep '%s'|grep -v grep|awk '{print $2}' ", proc.Cmd))
@@ -404,7 +404,7 @@ func (p *AppManager) CheckExtProcByCode(code string) error {
 func (p *AppManager) StartExtProcByCode(code string) error {
 	procObj, exist := p.extProcStore.Get(code)
 	if !exist {
-		return errors.New(fmt.Sprintf("未注册的外部服务:%s", code))
+		return fmt.Errorf("未注册的外部服务:%s", code)
 	}
 	proc := procObj
 	cmdStr := proc.Cmd
@@ -434,7 +434,7 @@ func (p *AppManager) StartExtProcByCode(code string) error {
 func (p *AppManager) StopExtProcByCode(code string) error {
 	procObj, exist := p.extProcStore.Get(code)
 	if !exist {
-		return errors.New(fmt.Sprintf("未注册的外部服务:%s", code))
+		return fmt.Errorf("未注册的外部服务:%s", code)
 	}
 	proc := procObj
 	if proc.PID != "" && proc.Status == ProcRun {

@@ -51,11 +51,8 @@ func main() {
 			log.Fatalf("run service [%s] fail, ERR:%s", service, err)
 		}
 		runServiceList = append(runServiceList, service)
-		
 	}
-	
-	select {}
-	
+	//select {}
 	signalChan := make(chan os.Signal, 1)
 	cleanupDone := make(chan bool)
 	signal.Notify(signalChan,
