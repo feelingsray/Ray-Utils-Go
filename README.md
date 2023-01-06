@@ -1,10 +1,11 @@
-<p align="center" style="font-size:35px;">Ray-Utils-Go</p>
+<a href="https://iot.coal-cloud.cn"><h1 align="center">Ray-Utils-Go</h1></a>
+[![GoDoc](https://godoc.org/github.com/feelingsray/Ray-Utils-Go?status.svg)](https://godoc.org/github.com/feelingsray/Ray-Utils-Go)
 
-### 1.使用说明
+## 1.使用说明
 
     go get -u github.com/feelingsray/Ray-Utils-Go
 
-### 2.主要功能
+## 2.主要功能
 
 + 协程管理器
 + 多种编解码
@@ -13,7 +14,7 @@
 + 通用工具包
 + 日志管理器
 
-### 3.目录说明
+## 3.目录说明
 
     Ray-Utils-Go
     ├── appManager          协程管理
@@ -27,7 +28,7 @@
     ├── secret              加密工具
     ├── tools               工具软件
 
-### 4.go版本 >=1.18
+## 4.go版本 >=1.18
 
     > go version
 
