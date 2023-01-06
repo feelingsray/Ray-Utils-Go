@@ -1,4 +1,6 @@
 <a href="https://iot.coal-cloud.cn"><h1 align="center">Ray-Utils-Go</h1></a>
+[![License Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-red.svg)](COPYING)
+[![Golang](https://img.shields.io/badge/Language-go1.18+-blue.svg)](https://go.dev/)
 [![GoDoc](https://godoc.org/github.com/feelingsray/Ray-Utils-Go?status.svg)](https://godoc.org/github.com/feelingsray/Ray-Utils-Go)
 
 ## 1.使用说明
