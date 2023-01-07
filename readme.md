@@ -1,3 +1,3 @@
-# Ray-Utils-Go V2
+# ray-utils-go V2
 
-Ray-Utils-Go v2版本库,与v1版本存在不兼容可能
+ray-utils-go v2版本库,与v1版本存在不兼容可能

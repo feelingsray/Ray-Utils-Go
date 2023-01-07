@@ -1,3 +1,3 @@
-module github.com/feelingsray/Ray-Utils-Go/v2
+module github.com/feelingsray/ray-utils-go/v2
 
-go 1.15
+go 1.18
