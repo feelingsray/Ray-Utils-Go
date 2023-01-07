@@ -162,7 +162,7 @@ type AppManager struct {
 }
 
 // RegisterProc 注册内部服务
-func (p *AppManager) RegisterProc(code string, name string) error {
+func (p *AppManager) RegisterProc(code, name string) error {
 	proc := new(Proc)
 	proc.Code = code
 	proc.Name = name
@@ -339,7 +339,7 @@ func (p *AppManager) RestartProcAfterInit() error {
 /**************************   外部服务  ********************************************/
 
 // RegisterExtProc 注册外部服务
-func (p *AppManager) RegisterExtProc(code string, name string, cmd string, always bool, sudo bool) error {
+func (p *AppManager) RegisterExtProc(code, name, cmd string, always, sudo bool) error {
 	proc := new(ExtProc)
 	proc.Code = code
 	proc.Name = name
@@ -642,7 +642,7 @@ func (p *AppManager) cors() gin.HandlerFunc {
 }
 
 // HttpBasicAuth 基于用户名密码的验证
-func (p *AppManager) httpBasicAuth(authFunc func(user string, password string, dt int64, mySecret []string) (bool, error, string)) gin.HandlerFunc {
+func (p *AppManager) httpBasicAuth(authFunc func(user, password string, dt int64, mySecret []string) (bool, error, string)) gin.HandlerFunc {
 	realm := "Basic realm=" + strconv.Quote("")
 	return func(c *gin.Context) {
 		auth := c.GetHeader("Authorization")
@@ -678,7 +678,7 @@ func (p *AppManager) httpBasicAuth(authFunc func(user string, password string, d
 }
 
 // BasicAuth 用户名密码验证
-func (p *AppManager) basicAuth(username string, pwd string, dt int64, mySecret []string) (bool, error, string) {
+func (p *AppManager) basicAuth(username, pwd string, dt int64, mySecret []string) (bool, error, string) {
 	// 接口用户
 	for su, sp := range p.SuperAuth {
 		if username == su && (pwd == encode.MD5(sp) || pwd == sp) {
@@ -700,7 +700,7 @@ func (p *AppManager) basicAuth(username string, pwd string, dt int64, mySecret [
 /********************** 扩展方法 ****************/
 
 // SetCached 设置缓存信息
-func (p *AppManager) SetCached(key string, field string, value string) (int64, error) {
+func (p *AppManager) SetCached(key, field, value string) (int64, error) {
 	return p.AppCached.HSet([]byte(key), []byte(field), []byte(value))
 }
 
@@ -718,7 +718,7 @@ func (p *AppManager) GetCachedAll(key string) (map[string]string, error) {
 }
 
 // GetCached 获取缓存信息
-func (p *AppManager) GetCached(key string, field string) (string, error) {
+func (p *AppManager) GetCached(key, field string) (string, error) {
 	dataByte, err := p.AppCached.HGet([]byte(key), []byte(field))
 	if err != nil {
 		return "", err
