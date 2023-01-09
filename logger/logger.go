@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"time"
 	
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
+	"github.com/lestrrat-go/file-rotatelogs"
 	"github.com/sirupsen/logrus"
 	
-	"github.com/feelingsray/Ray-Utils-Go/tools"
+	"github.com/feelingsray/ray-utils-go/v2/tools"
 )
 
 const (
