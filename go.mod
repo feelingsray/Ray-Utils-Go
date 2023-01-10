@@ -3,7 +3,7 @@ module github.com/feelingsray/ray-utils-go/v2
 go 1.18
 
 require (
-	github.com/bytedance/sonic v1.6.1
+	github.com/bytedance/sonic v1.7.0
 	github.com/gin-contrib/pprof v1.4.0
 	github.com/gin-gonic/gin v1.8.2
 	github.com/ledisdb/ledisdb v0.0.0-20200510135210-d35789ec47e6
