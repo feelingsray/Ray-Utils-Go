@@ -1,7 +1,6 @@
 package appManager
 
 import (
-	"bufio"
 	"bytes"
 	"embed"
 	"encoding/base64"
@@ -9,7 +8,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"os/exec"
 	"path"
 	"path/filepath"
@@ -83,7 +81,7 @@ type ExtProc struct {
 }
 
 // NewAppManager 初始化一个管理对象
-func NewAppManager(appCode string, port int, registerApi RegisterManagerApi, initCallBack AppInitCallBack,
+func NewAppManager(appCode string, port int, mApi RegisterManagerApi, pApi RegisterProxyApi, initCallBack AppInitCallBack,
 	doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack, sysDir string, debug bool) (*AppManager, error) {
 	manager := new(AppManager)
 	manager.SuperAuth = SuperAuth
@@ -97,13 +95,12 @@ func NewAppManager(appCode string, port int, registerApi RegisterManagerApi, ini
 	manager.extProcStore = cmap.New[*ExtProc]()
 	if debug {
 		gin.SetMode(gin.DebugMode)
-		manager.engRouter.Use(gin.Logger())
-		manager.engRouter.Use(gin.Recovery())
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	manager.engRouter = gin.New()
-	manager.registerManagerApi = registerApi
+	manager.registerManagerApi = mApi
+	manager.registerProxyApi = pApi
 	manager.initCallBack = initCallBack
 	manager.doCallBack = doCallBack
 	manager.destroyCallBack = destroyCallBack
@@ -131,6 +128,8 @@ func NewAppManager(appCode string, port int, registerApi RegisterManagerApi, ini
 
 type RegisterManagerApi func(engRouter *gin.RouterGroup)
 
+type RegisterProxyApi func(engRouter *gin.RouterGroup)
+
 type AppInitCallBack func(am *AppManager) error
 
 type AppDoCallBack func(code string, am *AppManager)
@@ -153,6 +152,7 @@ type AppManager struct {
 	engRouter          *gin.Engine
 	port               int
 	registerManagerApi RegisterManagerApi
+	registerProxyApi   RegisterProxyApi
 	initCallBack       AppInitCallBack
 	doCallBack         AppDoCallBack
 	destroyCallBack    AppDestroyCallBack
@@ -874,7 +874,7 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 /*********************** 主方法 *****************/
 
 // Manager 主入口服务
-func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS, proxies map[string][]string, https bool, dir string) {
+func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS, https bool, dir string) {
 	p.engRouter.Use(p.cors())
 	pprof.Register(p.engRouter)
 	if webPath != "" {
@@ -901,7 +901,6 @@ func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS
 			c.FileFromFS("index.html", http.FS(fs))
 		})
 	}
-	
 	// 源数据文件下载路径
 	rawPath := "/jylink/raw"
 	if ok, _ := tools.PathExists(rawPath); ok {
@@ -918,35 +917,7 @@ func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS
 		c.JSON(200, version)
 		return
 	})
-	for addr, proxy := range proxies {
-		for _, relativePath := range proxy {
-			group := p.engRouter.Group(relativePath)
-			group.Any("/*action", func(c *gin.Context) {
-				req := c.Request
-				parse, err := url.Parse(addr)
-				if err != nil {
-					c.String(500, fmt.Sprintf("error in parse addr: %v", err))
-					return
-				}
-				req.URL.Scheme = parse.Scheme
-				req.URL.Host = parse.Host
-				transport := http.DefaultTransport
-				resp, err := transport.RoundTrip(req)
-				if err != nil {
-					c.String(500, fmt.Sprintf("error in roundtrip: %v", err))
-					return
-				}
-				for k, vv := range resp.Header {
-					for _, v := range vv {
-						c.Header(k, v)
-					}
-				}
-				defer resp.Body.Close()
-				bufio.NewReader(resp.Body).WriteTo(c.Writer)
-				return
-			})
-		}
-	}
+	
 	mapi := p.engRouter.Group("/mapi/")
 	mapi.GET("/version/", func(c *gin.Context) {
 		mapiVersion := make(map[string]any, 0)
@@ -986,6 +957,8 @@ func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS
 	mapi.GET("/extProc/list/", p.getExtProcListApi)
 	// 注入外部managerAPI接口
 	p.registerManagerApi(mapi)
+	papi := p.engRouter.Group("/")
+	p.registerProxyApi(papi)
 	server := &http.Server{
 		Addr:           fmt.Sprintf(":%d", p.port),
 		Handler:        p.engRouter,
