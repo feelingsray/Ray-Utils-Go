@@ -19,6 +19,7 @@ require (
 )
 
 require (
+	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/cupcake/rdb v0.0.0-20161107195141-43ba34106c76 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
@@ -63,13 +64,16 @@ require (
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.1 // indirect
 	github.com/xdg-go/stringprep v1.0.3 // indirect
+	github.com/xujiajun/mmap-go v1.0.1 // indirect
+	github.com/xujiajun/nutsdb v0.11.1 // indirect
+	github.com/xujiajun/utils v0.0.0-20220904132955-5f7c5b914235 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
 	golang.org/x/net v0.4.0 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/sys v0.4.0 // indirect
 	golang.org/x/text v0.5.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.66.6 // indirect
