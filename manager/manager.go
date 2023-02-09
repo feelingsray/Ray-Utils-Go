@@ -889,7 +889,6 @@ func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS
 			})
 		}
 	}
-	
 	_, err := fs.ReadFile("index.html")
 	if webPath == "" && err == nil {
 		p.engRouter.StaticFS("/ui", http.FS(fs))
@@ -956,8 +955,10 @@ func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS
 	mapi.GET("/extProc/list/", p.getExtProcListApi)
 	// 注入外部managerAPI接口
 	p.registerManagerApi(mapi)
-	papi := p.engRouter.Group("/")
-	p.registerProxyApi(papi)
+	if p.registerProxyApi != nil {
+		papi := p.engRouter.Group("/")
+		p.registerProxyApi(papi)
+	}
 	server := &http.Server{
 		Addr:           fmt.Sprintf(":%d", p.port),
 		Handler:        p.engRouter,
