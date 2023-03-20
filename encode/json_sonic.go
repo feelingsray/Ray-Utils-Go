@@ -1,3 +1,5 @@
+//go:build !std
+
 package encode
 
 import (
