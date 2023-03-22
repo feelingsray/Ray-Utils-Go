@@ -873,33 +873,25 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 /*********************** 主方法 *****************/
 
 // Manager 主入口服务
-func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS, https bool, dir string) {
+func (p *AppManager) Manager(version map[string]any, fss map[string]embed.FS, https bool, dir string) {
 	p.engRouter.Use(p.cors())
 	pprof.Register(p.engRouter)
-	if webPath != "" {
-		if ok, _ := tools.PathExists(webPath); ok {
-			// 加载静态页面
-			p.engRouter.Static("/static", path.Join(webPath, "static"))
-			p.engRouter.LoadHTMLGlob(path.Join(webPath, "index.html"))
+	for loc, fs := range fss {
+		_, err := fs.ReadFile("index.html")
+		if err != nil {
+			log.Println("read index err ", err.Error())
+			continue
+		}
+		p.engRouter.StaticFS("/"+loc, http.FS(fs))
+		if loc == "main" {
 			p.engRouter.GET("/", func(c *gin.Context) {
-				c.HTML(http.StatusOK, "index.html", nil)
+				c.Redirect(http.StatusMovedPermanently, "/"+loc)
 			})
-			p.engRouter.GET("/:static", func(c *gin.Context) {
-				c.HTML(http.StatusOK, "index.html", nil)
+			p.engRouter.NoRoute(func(c *gin.Context) {
+				c.FileFromFS("index.html", http.FS(fs))
 			})
 		}
 	}
-	_, err := fs.ReadFile("index.html")
-	if webPath == "" && err == nil {
-		p.engRouter.StaticFS("/ui", http.FS(fs))
-		p.engRouter.GET("/", func(c *gin.Context) {
-			c.Redirect(http.StatusMovedPermanently, "/ui")
-		})
-		p.engRouter.NoRoute(func(c *gin.Context) {
-			c.FileFromFS("index.html", http.FS(fs))
-		})
-	}
-	
 	// 源数据文件下载路径
 	rawPath := "/jylink/raw"
 	if ok, _ := tools.PathExists(rawPath); ok {
@@ -969,11 +961,11 @@ func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS
 	if https {
 		certFile := filepath.Join(dir, "server.crt")
 		keyFile := filepath.Join(dir, "server.key")
-		if err = server.ListenAndServeTLS(certFile, keyFile); err != nil {
+		if err := server.ListenAndServeTLS(certFile, keyFile); err != nil {
 			log.Fatalf("Manager框架监听错误:%s", err.Error())
 		}
 	} else {
-		if err = server.ListenAndServe(); err != nil {
+		if err := server.ListenAndServe(); err != nil {
 			log.Fatalf("Manager框架监听错误:%s", err.Error())
 		}
 	}
