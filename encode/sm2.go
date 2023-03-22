@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"errors"
 	
-	"github.com/tjfoc/gmsm/sm2"
+	"github.com/ivanlebron/gmsm/sm2"
 )
 
 type SM2Crypt struct {

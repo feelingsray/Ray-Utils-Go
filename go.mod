@@ -6,6 +6,7 @@ require (
 	github.com/bytedance/sonic v1.6.1
 	github.com/gin-contrib/pprof v1.4.0
 	github.com/gin-gonic/gin v1.8.1
+	github.com/ivanlebron/gmsm v1.0.0
 	github.com/ledisdb/ledisdb v0.0.0-20200510135210-d35789ec47e6
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/minio/minio-go/v7 v7.0.44
@@ -14,7 +15,6 @@ require (
 	github.com/shirou/gopsutil/v3 v3.22.12
 	github.com/sirupsen/logrus v1.9.0
 	github.com/tidwall/sjson v1.2.5
-	github.com/tjfoc/gmsm v1.3.2
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	go.mongodb.org/mongo-driver v1.11.1
 	go.uber.org/ratelimit v0.2.0

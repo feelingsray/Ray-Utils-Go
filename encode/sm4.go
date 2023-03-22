@@ -5,7 +5,7 @@ import (
 	"crypto/cipher"
 	"encoding/hex"
 	
-	"github.com/tjfoc/gmsm/sm4"
+	"github.com/ivanlebron/gmsm/sm4"
 )
 
 type SM4Crypt struct {
