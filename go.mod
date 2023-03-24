@@ -6,6 +6,7 @@ require (
 	github.com/bytedance/sonic v1.8.5
 	github.com/gin-contrib/pprof v1.4.0
 	github.com/gin-gonic/gin v1.8.2
+	github.com/ivanlebron/gmsm v1.0.0
 	github.com/ledisdb/ledisdb v0.0.0-20200510135210-d35789ec47e6
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/minio/minio-go/v7 v7.0.46
