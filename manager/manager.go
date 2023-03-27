@@ -904,18 +904,18 @@ func (p *AppManager) Manager(version map[string]any, fss map[string]embed.FS, ht
 		// 加载静态页面
 		p.engRouter.StaticFS("/dl", http.Dir(dlPath))
 	}
-	p.engRouter.GET("/version/", func(c *gin.Context) {
+	p.engRouter.GET("/version", func(c *gin.Context) {
 		c.JSON(200, version)
 		return
 	})
-	mapi := p.engRouter.Group("/mapi/")
-	mapi.GET("/version/", func(c *gin.Context) {
+	mapi := p.engRouter.Group("/mapi")
+	mapi.GET("/version", func(c *gin.Context) {
 		mapiVersion := make(map[string]any, 0)
 		mapiVersion["version"] = p.ManagerInfo.Version
 		c.JSON(200, mapiVersion)
 		return
 	})
-	mapi.GET("/info/", func(c *gin.Context) {
+	mapi.GET("/info", func(c *gin.Context) {
 		info := make(map[string]any, 0)
 		info["version"] = p.ManagerInfo.Version
 		info["copyright"] = p.ManagerInfo.Version
@@ -929,22 +929,22 @@ func (p *AppManager) Manager(version map[string]any, fss map[string]embed.FS, ht
 		c.JSON(200, info)
 		return
 	})
-	mapi.GET("/psinfo/", func(c *gin.Context) {
+	mapi.GET("/psinfo", func(c *gin.Context) {
 		c.JSON(200, p.GetPSInfo(5))
 		return
 	})
 	// 公共登录接口
-	mapi.POST("/login/", p.login)
+	mapi.POST("/login", p.login)
 	// 登录加密
 	mapi.Use(p.httpBasicAuth(p.basicAuth))
 	// 注册内部服务API
-	mapi.GET("/proc/add/", p.addProcApi)
-	mapi.GET("/proc/delete/", p.deleteProcApi)
-	mapi.GET("/proc/restart/", p.restartProcApi)
-	mapi.GET("/proc/stop/", p.stopProcApi)
-	mapi.GET("/proc/list/", p.getProcListApi)
+	mapi.GET("/proc/add", p.addProcApi)
+	mapi.GET("/proc/delete", p.deleteProcApi)
+	mapi.GET("/proc/restart", p.restartProcApi)
+	mapi.GET("/proc/stop", p.stopProcApi)
+	mapi.GET("/proc/list", p.getProcListApi)
 	// 注册外部服务API
-	mapi.GET("/extProc/list/", p.getExtProcListApi)
+	mapi.GET("/extProc/list", p.getExtProcListApi)
 	// 注入外部managerAPI接口
 	p.registerManagerApi(mapi)
 	if p.registerProxyApi != nil {
