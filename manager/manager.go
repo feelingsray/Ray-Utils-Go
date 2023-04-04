@@ -882,24 +882,27 @@ func (p *AppManager) Manager(version map[string]any, fss map[string]embed.FS, ht
 			log.Println("read index err ", err.Error())
 			continue
 		}
-		p.engRouter.StaticFS("/"+loc, http.FS(fs))
 		if loc == "main" {
+			p.engRouter.StaticFS("/ui", http.FS(fs))
 			p.engRouter.GET("/", func(c *gin.Context) {
-				c.Redirect(http.StatusMovedPermanently, "/"+loc)
+				c.Redirect(http.StatusMovedPermanently, "/ui")
 			})
 			p.engRouter.NoRoute(func(c *gin.Context) {
 				c.FileFromFS("index.html", http.FS(fs))
 			})
+		} else {
+			p.engRouter.StaticFS("/"+loc, http.FS(fs))
 		}
+		
 	}
 	// 源数据文件下载路径
-	rawPath := "/jylink/raw"
+	rawPath := "/jyaiot/raw"
 	if ok, _ := tools.PathExists(rawPath); ok {
 		// 加载静态页面
 		p.engRouter.StaticFS("/raw", http.Dir(rawPath))
 	}
 	//dl文件下载路径
-	dlPath := "/jylink/download"
+	dlPath := "/jyaiot/download"
 	if ok, _ := tools.PathExists(dlPath); ok {
 		// 加载静态页面
 		p.engRouter.StaticFS("/dl", http.Dir(dlPath))
