@@ -2,7 +2,7 @@ package crypt
 
 import (
 	"encoding/hex"
-	
+
 	"github.com/ivanlebron/gmsm/sm2"
 )
 
@@ -11,12 +11,18 @@ type SM2Crypt struct {
 }
 
 func NewSM2Crypt(pwd string) *SM2Crypt {
+	if pwd == "" {
+		return &SM2Crypt{}
+	}
 	return &SM2Crypt{
 		pwd: []byte(pwd),
 	}
 }
 
 func (s *SM2Crypt) ReadPrivateKeyFromMem(key string) (*sm2.PrivateKey, error) {
+	if len(s.pwd) == 0 {
+		s.pwd = nil
+	}
 	privateKey, err := sm2.ReadPrivateKeyFromMem([]byte(key), s.pwd)
 	if err != nil {
 		return nil, err
@@ -26,6 +32,9 @@ func (s *SM2Crypt) ReadPrivateKeyFromMem(key string) (*sm2.PrivateKey, error) {
 }
 
 func (s *SM2Crypt) ReadPublicKeyFromMem(key string) (*sm2.PublicKey, error) {
+	if len(s.pwd) == 0 {
+		s.pwd = nil
+	}
 	publicKey, err := sm2.ReadPublicKeyFromMem([]byte(key), s.pwd)
 	if err != nil {
 		return nil, err

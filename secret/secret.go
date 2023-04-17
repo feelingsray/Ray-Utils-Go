@@ -2,29 +2,27 @@ package secret
 
 import (
 	"github.com/ivanlebron/gmsm/sm2"
-	
+
 	"github.com/feelingsray/ray-utils-go/v2/crypt"
 )
 
 func NewSecretCrypt() (*Sm2Crypt, error) {
 	sc := new(Sm2Crypt)
 	sc.privateK = `
------BEGIN ENCRYPTED PRIVATE KEY-----
-MIH8MFcGCSqGSIb3DQEFDTBKMCkGCSqGSIb3DQEFDDAcBAiDaVfqFsXo3wICCAAw
-DAYIKoZIhvcNAgcFADAdBglghkgBZQMEASoEEJ4c0sQeuMSsPuoUqLuQkkEEgaBm
-kM09xMwjTXNxTgHdxKP+9y5jknqinmAYfQoqMBq3E4VGVK07+2NbKKfnjpdSLsTV
-tPol9qY1XkI8EI4S4EqzExpawC4NG1uhXs7LxhcFXBtOk0bPadLH5/BLyRHc06tG
-oGephca/lxlPzU4LsjB5kNeuo2fhflxCSEByxYXOqkLYRERip5MqM0/NxN09zFTe
-K2SFtkCC1Tb2I8nkTU9w
------END ENCRYPTED PRIVATE KEY-----
+-----BEGIN PRIVATE KEY-----
+MIGTAgEAMBMGByqGSM49AgEGCCqBHM9VAYItBHkwdwIBAQQgTb8gsPZI/r6skcKg
+SoHDwfCfLkU2XysZCqHdWbf97kKgCgYIKoEcz1UBgi2hRANCAARqcTpGGBKLbmYe
+E+wOQFbrV5gGbNd8G+iMeKsws1pOUw80V1CbUFruF0e/MG+weveRcQsv+NUqT6X7
+1HK0HTAo
+-----END PRIVATE KEY-----
 `
 	sc.publicK = `
 -----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoEcz1UBgi0DQgAESp2XedoldFaeedu8b6OMZDyMQmJR
-Kuto6F8KIcLd58OoYfsfaC78E+T8kI2CS9U8jLR9X6fzGDSEGpYxEzN4Ng==
+MFkwEwYHKoZIzj0CAQYIKoEcz1UBgi0DQgAEanE6RhgSi25mHhPsDkBW61eYBmzX
+fBvojHirMLNaTlMPNFdQm1Ba7hdHvzBvsHr3kXELL/jVKk+l+9RytB0wKA==
 -----END PUBLIC KEY-----
 `
-	sc.pwd = "r19a224y"
+	//sc.pwd = "r19a224y"
 	sm2Crypt := crypt.NewSM2Crypt(sc.pwd)
 	privateKey, err := sm2Crypt.ReadPrivateKeyFromMem(sc.privateK)
 	if err != nil {
