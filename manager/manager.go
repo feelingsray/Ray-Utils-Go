@@ -873,8 +873,9 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 /*********************** 主方法 *****************/
 
 // Manager 主入口服务
-func (p *AppManager) Manager(version map[string]any, fss map[string]embed.FS, https bool, dir string) {
+func (p *AppManager) Manager(version map[string]any, fss map[string]embed.FS, https bool, dir string, middleware ...gin.HandlerFunc) {
 	p.engRouter.Use(p.cors())
+	p.engRouter.Use(middleware...)
 	pprof.Register(p.engRouter)
 	for loc, fs := range fss {
 		_, err := fs.ReadFile("index.html")
