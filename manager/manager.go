@@ -17,8 +17,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	
-	"github.com/gin-contrib/pprof"
+
 	"github.com/gin-gonic/gin"
 	"github.com/ledisdb/ledisdb/config"
 	"github.com/ledisdb/ledisdb/ledis"
@@ -28,7 +27,7 @@ import (
 	"github.com/shirou/gopsutil/v3/load"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/process"
-	
+
 	"github.com/feelingsray/ray-utils-go/v2/rotp"
 	"github.com/feelingsray/ray-utils-go/v2/serialize"
 	"github.com/feelingsray/ray-utils-go/v2/tools"
@@ -308,7 +307,7 @@ func (p *AppManager) RestartProcAfterInit() error {
 			time.Sleep(1 * time.Millisecond)
 		}
 	}
-	
+
 	if !p.firstRun {
 		// 清除注册服务
 		p.ClearAllProc()
@@ -318,7 +317,7 @@ func (p *AppManager) RestartProcAfterInit() error {
 			return errors.New("销毁资源失败:" + err.Error())
 		}
 	}
-	
+
 	// 关闭第一次启动
 	p.firstRun = false
 	// 重新初始化
@@ -630,7 +629,7 @@ func (p *AppManager) cors() gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE,OPTIONS")
 		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type")
 		c.Header("Access-Control-Allow-Credentials", "true")
-		
+
 		//放行所有OPTIONS方法
 		if method == "OPTIONS" {
 			c.AbortWithStatus(http.StatusNoContent)
@@ -693,7 +692,7 @@ func (p *AppManager) basicAuth(username, pwd string, dt int64, mySecret []string
 		}
 	}
 	return false, errors.New("用户非OTP用户或Super用户"), ""
-	
+
 }
 
 /********************** 扩展方法 ****************/
@@ -799,9 +798,9 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 		}
 	}
 	psInfo["ip"] = ip
-	
+
 	processInfo, _ := process.Processes()
-	
+
 	var processCpuList ProcessResourcesSlice
 	var processMemList ProcessResourcesSlice
 	for _, processOne := range processInfo {
@@ -813,7 +812,7 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 		if err != nil {
 			fmt.Println(err)
 		}
-		
+
 		pc := new(ProcessResources)
 		pc.Pid = processOne.Pid
 		pc.Name = pName
@@ -822,7 +821,7 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 		if err != nil {
 			fmt.Println(err)
 		}
-		
+
 		pm := new(ProcessResources)
 		pm.Pid = processOne.Pid
 		pm.Name = pName
@@ -832,13 +831,13 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 			fmt.Println(err)
 		}
 		pm.Resources = float64(pMem)
-		
+
 		processCpuList = append(processCpuList, *pc)
 		processMemList = append(processMemList, *pm)
 	}
 	sort.Stable(processCpuList)
 	sort.Stable(processMemList)
-	
+
 	if len(processCpuList) > processTop && processCpuList != nil {
 		processCpuList = processCpuList[:processTop]
 	}
@@ -852,7 +851,7 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 		cpuTopX = append(cpuTopX, tmp)
 	}
 	psInfo["cpu_top"] = cpuTopX
-	
+
 	if len(processMemList) > processTop && processMemList != nil {
 		processMemList = processMemList[:processTop]
 	}
@@ -866,7 +865,7 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 		memTopX = append(memTopX, tmp)
 	}
 	psInfo["mem_top"] = memTopX
-	
+
 	return psInfo
 }
 
@@ -876,7 +875,7 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 func (p *AppManager) Manager(version map[string]any, fss map[string]embed.FS, https bool, dir string, middleware ...gin.HandlerFunc) {
 	p.engRouter.Use(p.cors())
 	p.engRouter.Use(middleware...)
-	pprof.Register(p.engRouter)
+	//pprof.Register(p.engRouter)
 	for loc, fs := range fss {
 		_, err := fs.ReadFile("index.html")
 		if err != nil {
@@ -894,7 +893,7 @@ func (p *AppManager) Manager(version map[string]any, fss map[string]embed.FS, ht
 		} else {
 			p.engRouter.StaticFS("/"+loc, http.FS(fs))
 		}
-		
+
 	}
 	// 源数据文件下载路径
 	rawPath := "/jyaiot/raw"
