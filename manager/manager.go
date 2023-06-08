@@ -18,6 +18,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/ledisdb/ledisdb/config"
 	"github.com/ledisdb/ledisdb/ledis"
@@ -875,7 +876,7 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 func (p *AppManager) Manager(version map[string]any, fss map[string]embed.FS, https bool, dir string, middleware ...gin.HandlerFunc) {
 	p.engRouter.Use(p.cors())
 	p.engRouter.Use(middleware...)
-	//pprof.Register(p.engRouter)
+	pprof.Register(p.engRouter)
 	for loc, fs := range fss {
 		_, err := fs.ReadFile("index.html")
 		if err != nil {
