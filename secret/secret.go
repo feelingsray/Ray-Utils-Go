@@ -5,20 +5,46 @@ import (
 	"os"
 )
 
-func NewCrypt() (*Crypt, error) {
+var (
+	sysPrivate = `
+-----BEGIN PRIVATE KEY-----
+MIGTAgEAMBMGByqGSM49AgEGCCqBHM9VAYItBHkwdwIBAQQgTb8gsPZI/r6skcKg
+SoHDwfCfLkU2XysZCqHdWbf97kKgCgYIKoEcz1UBgi2hRANCAARqcTpGGBKLbmYe
+E+wOQFbrV5gGbNd8G+iMeKsws1pOUw80V1CbUFruF0e/MG+weveRcQsv+NUqT6X7
+1HK0HTAo
+-----END PRIVATE KEY-----
+`
+	sysPublic = `
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoEcz1UBgi0DQgAEanE6RhgSi25mHhPsDkBW61eYBmzX
+fBvojHirMLNaTlMPNFdQm1Ba7hdHvzBvsHr3kXELL/jVKk+l+9RytB0wKA==
+-----END PUBLIC KEY-----
+`
+)
+
+func NewCrypt(private, public string) (*Crypt, error) {
 	sc := new(Crypt)
-	switch os.Getenv("CRYPTMODE") {
-	case "sm2":
+	if private != "" {
 		sc.mode = "sm2"
-		sm2, err := NewSM2()
+		sm2, err := NewSM2(private, public)
 		if err != nil {
 			return sc, err
 		}
 		sc.sm2 = sm2
-	default:
-		sc.mode = "aes"
-		aes := NewAES()
-		sc.aes = aes
+	} else {
+		switch os.Getenv("CRYPTMODE") {
+		case "sm2":
+			sc.mode = "sm2"
+			sm2, err := NewSM2(sysPrivate, sysPublic)
+			if err != nil {
+				return sc, err
+			}
+			sc.sm2 = sm2
+		default:
+			sc.mode = "aes"
+			aes := NewAES()
+			sc.aes = aes
+		}
 	}
 	return sc, nil
 }

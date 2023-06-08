@@ -5,23 +5,10 @@ import (
 	"github.com/ivanlebron/gmsm/sm2"
 )
 
-func NewSM2() (*SM2Crypt, error) {
+func NewSM2(private, public string) (*SM2Crypt, error) {
 	sc := new(SM2Crypt)
-	sc.privateK = `
------BEGIN PRIVATE KEY-----
-MIGTAgEAMBMGByqGSM49AgEGCCqBHM9VAYItBHkwdwIBAQQgTb8gsPZI/r6skcKg
-SoHDwfCfLkU2XysZCqHdWbf97kKgCgYIKoEcz1UBgi2hRANCAARqcTpGGBKLbmYe
-E+wOQFbrV5gGbNd8G+iMeKsws1pOUw80V1CbUFruF0e/MG+weveRcQsv+NUqT6X7
-1HK0HTAo
------END PRIVATE KEY-----
-`
-	sc.publicK = `
------BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoEcz1UBgi0DQgAEanE6RhgSi25mHhPsDkBW61eYBmzX
-fBvojHirMLNaTlMPNFdQm1Ba7hdHvzBvsHr3kXELL/jVKk+l+9RytB0wKA==
------END PUBLIC KEY-----
-`
-	//sc.pwd = "r19a224y"
+	sc.privateK = private
+	sc.publicK = public
 	sm2Crypt := crypt.NewSM2Crypt(sc.pwd)
 	privateKey, err := sm2Crypt.ReadPrivateKeyFromMem(sc.privateK)
 	if err != nil {
