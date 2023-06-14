@@ -11,7 +11,7 @@ import (
 )
 
 func TestNewSecretCrypt(t *testing.T) {
-	crypt, err := NewCrypt()
+	crypt, err := NewCrypt("", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -22,13 +22,13 @@ func TestNewSecretCrypt(t *testing.T) {
 	json, _ := serialize.DumpJson(test)
 	start := time.Now()
 	for x := 0; x < 1000; x++ {
-		encrypt, err := crypt.Encrypt(string(json))
+		encrypt, err := crypt.Encrypt(string(json), "sm2")
 		if err != nil {
 			t.Fatal(err)
 		}
 		//t.Log(encrypt)
 
-		decrypt, err := crypt.Decrypt(encrypt)
+		decrypt, err := crypt.Decrypt(encrypt, "sm2")
 		if err != nil {
 			t.Fatal(err)
 		}
