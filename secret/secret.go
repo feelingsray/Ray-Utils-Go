@@ -2,7 +2,6 @@ package secret
 
 import (
 	"errors"
-	"os"
 )
 
 var (
@@ -22,29 +21,29 @@ fBvojHirMLNaTlMPNFdQm1Ba7hdHvzBvsHr3kXELL/jVKk+l+9RytB0wKA==
 `
 )
 
-func NewCrypt(private, public string) (*Crypt, error) {
+func NewCrypt(private, public, mode string) (*Crypt, error) {
 	sc := new(Crypt)
-	if private != "" {
-		sc.mode = "sm2"
-		sm2, err := NewSM2(private, public)
-		if err != nil {
-			return sc, err
-		}
-		sc.sm2 = sm2
-	} else {
-		switch os.Getenv("CRYPTMODE") {
-		case "sm2":
-			sc.mode = "sm2"
+	sc.mode = mode
+	switch sc.mode {
+	case "sm2":
+		if private != "" && public != "" {
+			sm2, err := NewSM2(private, public)
+			if err != nil {
+				return sc, err
+			}
+			sc.sm2 = sm2
+		} else {
 			sm2, err := NewSM2(sysPrivate, sysPublic)
 			if err != nil {
 				return sc, err
 			}
 			sc.sm2 = sm2
-		default:
-			sc.mode = "aes"
-			aes := NewAES()
-			sc.aes = aes
 		}
+	case "aes":
+		aes := NewAES()
+		sc.aes = aes
+	default:
+		return sc, errors.New("mode err")
 	}
 	return sc, nil
 }
