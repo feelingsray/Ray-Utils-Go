@@ -571,7 +571,7 @@ func (p *AppManager) login(c *gin.Context) {
 	err := c.BindJSON(&req)
 	if err != nil {
 		resp["code"] = 500
-		resp["err"] = "序列化参数失败"
+		resp["msg"] = "序列化参数失败"
 		c.JSON(500, resp)
 		return
 	}
@@ -581,14 +581,14 @@ func (p *AppManager) login(c *gin.Context) {
 	mySecret, myS := req["secret"]
 	if (un == false) || (pwd == false) || (dt == false) {
 		resp["code"] = 500
-		resp["err"] = "用户名、密码或客户端时间未传值"
+		resp["msg"] = "用户名、密码或客户端时间未传值"
 		c.JSON(500, resp)
 		return
 	}
 	tt, err := strconv.Atoi(timestamp)
 	if err != nil {
 		resp["code"] = 500
-		resp["err"] = "非法的时间戳"
+		resp["msg"] = "非法的时间戳"
 		c.JSON(500, resp)
 		return
 	}
@@ -599,13 +599,13 @@ func (p *AppManager) login(c *gin.Context) {
 	ok, err, key := p.basicAuth(username, password, int64(tt), mySecretList)
 	if err != nil {
 		resp["code"] = 500
-		resp["err"] = fmt.Sprintf("登录失败:%s", err.Error())
+		resp["msg"] = fmt.Sprintf("登录失败:%s", err.Error())
 		c.JSON(200, resp)
 		return
 	}
 	if !ok {
 		resp["code"] = 401
-		resp["err"] = fmt.Sprintf("登录失败:用户名或密码不正确")
+		resp["msg"] = fmt.Sprintf("登录失败:用户名或密码不正确")
 		c.JSON(401, resp)
 		return
 	}
