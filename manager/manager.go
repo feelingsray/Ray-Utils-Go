@@ -20,8 +20,8 @@ import (
 
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
-	"github.com/ledisdb/ledisdb/config"
-	"github.com/ledisdb/ledisdb/ledis"
+	"github.com/ivanlebron/ledisdb/config"
+	"github.com/ivanlebron/ledisdb/ledis"
 	"github.com/orcaman/concurrent-map/v2"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"

@@ -3,11 +3,13 @@ package integral
 import (
 	"context"
 	"fmt"
-	"github.com/feelingsray/ray-utils-go/v2/serialize"
-	"github.com/go-redis/redis/v8"
-	"github.com/spf13/cast"
 	"reflect"
 	"strconv"
+
+	"github.com/redis/go-redis/v9"
+	"github.com/spf13/cast"
+
+	"github.com/feelingsray/ray-utils-go/v2/serialize"
 )
 
 type Integral struct {

@@ -121,7 +121,7 @@ func RTOTPVerify(code string, mySecretList []string) (bool, string) {
 	for _, s := range secret {
 		mySecret := fmt.Sprintf("RAY2%sPYY4%s", s[:4], s[4:])
 		totp := gotp.NewTOTP(mySecret, 6, 30, nil)
-		if totp.Verify(code, int(time.Now().Unix())) {
+		if totp.Verify(code, time.Now().Unix()) {
 			return true, s
 		}
 	}
@@ -140,7 +140,7 @@ func RTOTPVerifyWithTime(code string, dt time.Time, mySecretList []string) (bool
 		}
 		mySecret := fmt.Sprintf("RAY2%sPYY4%s", s[:4], s[4:])
 		totp := gotp.NewTOTP(mySecret, 6, 30, nil)
-		if totp.Verify(code, int(dt.Unix())) {
+		if totp.Verify(code, dt.Unix()) {
 			return true, s
 		}
 	}
@@ -154,5 +154,5 @@ func RTOTPCode(secret string) string {
 
 func RTOTPCodeWithTime(secret string, dt time.Time) string {
 	mySecret := fmt.Sprintf("RAY2%sPYY4%s", secret[:4], secret[4:])
-	return gotp.NewTOTP(mySecret, 6, 30, nil).At(int(dt.Unix()))
+	return gotp.NewTOTP(mySecret, 6, 30, nil).At(dt.Unix())
 }
