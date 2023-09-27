@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 
 	uuid "github.com/satori/go.uuid"
@@ -17,12 +18,12 @@ func AutoShortStr(len int) string {
 	hex := fmt.Sprintf("%x", md5.Sum(v4.Bytes()))
 	val, _ := strconv.ParseInt(hex[8:8+8], 16, 0)
 	lHexLong := val & 0x3fffffff
-	outChars := ""
+	var outChars string
 	for j := 0; j < len; j++ {
 		outChars += chars[0x0000003D&lHexLong]
 		lHexLong >>= 3
 	}
-	return outChars
+	return fmt.Sprintf("%X%s", time.Now().UnixMilli(), outChars)
 }
 
 func StringsContains(obj string, list []string) bool {
