@@ -1,8 +1,9 @@
 package secret
 
 import (
-	"github.com/feelingsray/ray-utils-go/v2/crypt"
 	"github.com/ivanlebron/gmsm/sm2"
+
+	"github.com/feelingsray/ray-utils-go/v2/crypt"
 )
 
 func NewSM2(private, public string) (*SM2Crypt, error) {

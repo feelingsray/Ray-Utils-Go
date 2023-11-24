@@ -11,31 +11,30 @@ import (
 )
 
 func TestNewSecretCrypt(t *testing.T) {
-	crypt, err := NewCrypt("", "", "sm2")
+	crypt, err := NewCrypt("", "")
 	if err != nil {
 		t.Fatal(err)
 	}
 	test := map[string]int{}
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10000; i++ {
 		test[cast.ToString(i)] = i
 	}
 	json, _ := serialize.DumpJson(test)
 	start := time.Now()
-	for x := 0; x < 10; x++ {
-		encrypt, err := crypt.Encrypt(string(json))
+	for x := 0; x < 1000; x++ {
+		encrypt, err := crypt.Encrypt(string(json), "sm2")
 		if err != nil {
 			t.Fatal(err)
 		}
 		//t.Log(encrypt)
 
-		decrypt, err := crypt.Decrypt(encrypt)
+		decrypt, err := crypt.Decrypt(encrypt, "sm2")
 		if err != nil {
 			t.Fatal(err)
 		}
-		//t.Log(decrypt)
-
 		_, _ = encrypt, decrypt
 	}
+	//t.Log(decrypt)
 	time.Since(start)
 }
 

@@ -21,41 +21,34 @@ fBvojHirMLNaTlMPNFdQm1Ba7hdHvzBvsHr3kXELL/jVKk+l+9RytB0wKA==
 `
 )
 
-func NewCrypt(private, public, mode string) (*Crypt, error) {
+func NewCrypt(private, public string) (*Crypt, error) {
 	sc := new(Crypt)
-	sc.mode = mode
-	switch sc.mode {
-	case "sm2":
-		if private != "" && public != "" {
-			sm2, err := NewSM2(private, public)
-			if err != nil {
-				return sc, err
-			}
-			sc.sm2 = sm2
-		} else {
-			sm2, err := NewSM2(sysPrivate, sysPublic)
-			if err != nil {
-				return sc, err
-			}
-			sc.sm2 = sm2
+	if private != "" && public != "" {
+		sm2, err := NewSM2(private, public)
+		if err != nil {
+			return sc, err
 		}
-	case "aes":
-		aes := NewAES()
-		sc.aes = aes
-	default:
-		return sc, errors.New("mode err")
+		sc.sm2 = sm2
+		return sc, nil
 	}
+	sm2, err := NewSM2(sysPrivate, sysPublic)
+	if err != nil {
+		return sc, err
+	}
+	sc.sm2 = sm2
+	aes := NewAES()
+	sc.aes = aes
+
 	return sc, nil
 }
 
 type Crypt struct {
-	mode string
-	sm2  *SM2Crypt
-	aes  *AESCrypt
+	sm2 *SM2Crypt
+	aes *AESCrypt
 }
 
-func (s *Crypt) Decrypt(raw string) (string, error) {
-	switch s.mode {
+func (s *Crypt) Decrypt(raw, mode string) (string, error) {
+	switch mode {
 	case "aes":
 		return s.aes.decrypt(raw)
 	case "sm2":
@@ -64,8 +57,8 @@ func (s *Crypt) Decrypt(raw string) (string, error) {
 	return "", errors.New("crypt mode error")
 }
 
-func (s *Crypt) Encrypt(raw string) (string, error) {
-	switch s.mode {
+func (s *Crypt) Encrypt(raw, mode string) (string, error) {
+	switch mode {
 	case "aes":
 		return s.aes.encrypt(raw)
 	case "sm2":
