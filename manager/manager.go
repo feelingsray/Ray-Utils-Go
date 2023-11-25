@@ -614,6 +614,7 @@ func (p *AppManager) login(c *gin.Context) {
 	info["username"] = username
 	info["user_key"] = key
 	info["user_type"] = "admin"
+	info["role"] = "super"
 	info["app_code"] = p.AppCode
 	resp["data"] = info
 	c.JSON(200, resp)
