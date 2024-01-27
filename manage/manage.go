@@ -86,6 +86,7 @@ func NewAppManage(appCode string, port int, mApi RegisterManageApi, pApi Registe
 	manager.SuperAuth = SuperAuth
 	manager.firstRun = true
 	manager.AppCode = appCode
+	manager.Debug = debug
 	if port < 3000 && port != 443 && port != 80 {
 		port = 8888
 	}
@@ -158,6 +159,7 @@ type AppManage struct {
 	ManageInfo        *AMInfo
 	AppCached         *ledis.DB
 	SuperAuth         map[string]string
+	Debug             bool
 }
 
 // RegisterProc 注册内部服务
@@ -877,7 +879,9 @@ func (p *AppManage) GetPSInfo(processTop int) map[string]any {
 func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, https bool, dir string, middleware ...gin.HandlerFunc) {
 	p.engRouter.Use(p.cors())
 	p.engRouter.Use(middleware...)
-	pprof.Register(p.engRouter)
+	if p.Debug {
+		pprof.Register(p.engRouter)
+	}
 	for loc, fs := range fss {
 		_, err := fs.ReadFile("index.html")
 		if err != nil {
@@ -964,9 +968,7 @@ func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, http
 		MaxHeaderBytes: 1 << 20, // 2的20次方
 	}
 	if https {
-		certFile := filepath.Join(dir, "server.crt")
-		keyFile := filepath.Join(dir, "server.key")
-		if err := server.ListenAndServeTLS(certFile, keyFile); err != nil {
+		if err := server.ListenAndServeTLS(filepath.Join(dir, "server.crt"), filepath.Join(dir, "server.key")); err != nil {
 			log.Fatalf("Manage框架监听错误:%s", err.Error())
 		}
 	} else {
