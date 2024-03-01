@@ -80,7 +80,7 @@ type ExtProc struct {
 }
 
 // NewAppManage 初始化一个管理对象
-func NewAppManage(appCode string, port int, mApi RegisterManageApi, pApi RegisterProxyApi, initCallBack AppInitCallBack,
+func NewAppManage(appCode string, port int, mApi RegisterManageApi, pApi RegisterProxyApi, feApi RegisterFeApi, initCallBack AppInitCallBack,
 	doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack, sysDir string, debug bool) (*AppManage, error) {
 	manager := new(AppManage)
 	manager.SuperAuth = SuperAuth
@@ -101,6 +101,7 @@ func NewAppManage(appCode string, port int, mApi RegisterManageApi, pApi Registe
 	manager.engRouter = gin.New()
 	manager.registerManageApi = mApi
 	manager.registerProxyApi = pApi
+	manager.registerFeApi = feApi
 	manager.initCallBack = initCallBack
 	manager.doCallBack = doCallBack
 	manager.destroyCallBack = destroyCallBack
@@ -130,6 +131,8 @@ type RegisterManageApi func(engRouter *gin.RouterGroup)
 
 type RegisterProxyApi func(engRouter *gin.RouterGroup)
 
+type RegisterFeApi func(engRouter *gin.RouterGroup)
+
 type AppInitCallBack func(am *AppManage) error
 
 type AppDoCallBack func(code string, am *AppManage)
@@ -153,6 +156,7 @@ type AppManage struct {
 	port              int
 	registerManageApi RegisterManageApi
 	registerProxyApi  RegisterProxyApi
+	registerFeApi     RegisterFeApi
 	initCallBack      AppInitCallBack
 	doCallBack        AppDoCallBack
 	destroyCallBack   AppDestroyCallBack
@@ -917,6 +921,7 @@ func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, http
 		c.JSON(200, version)
 		return
 	})
+	feApi := p.engRouter.Group("/fe")
 	mapi := p.engRouter.Group("/mapi")
 	mapi.GET("/version", func(c *gin.Context) {
 		mapiVersion := make(map[string]any, 0)
@@ -954,8 +959,10 @@ func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, http
 	mapi.GET("/proc/list", p.getProcListApi)
 	// 注册外部服务API
 	mapi.GET("/extProc/list", p.getExtProcListApi)
-	// 注入外部managerAPI接口
+	// 注入外部ManageAPI接口
 	p.registerManageApi(mapi)
+	//注入外部FeAPI接口
+	p.registerFeApi(feApi)
 	if p.registerProxyApi != nil {
 		papi := p.engRouter.Group("/")
 		p.registerProxyApi(papi)
