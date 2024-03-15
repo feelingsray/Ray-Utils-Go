@@ -3,18 +3,18 @@
 package serialize
 
 import (
-	"github.com/bytedance/sonic"
+	"github.com/goccy/go-json"
 )
 
 func LoadJson(in []byte, out any) error {
-	if err := sonic.Unmarshal(in, out); err != nil {
+	if err := json.Unmarshal(in, out); err != nil {
 		return err
 	}
 	return nil
 }
 
 func DumpJson(in any) ([]byte, error) {
-	out, err := sonic.Marshal(in)
+	out, err := json.Marshal(in)
 	if err != nil {
 		return nil, err
 	}
