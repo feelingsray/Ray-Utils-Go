@@ -973,6 +973,10 @@ func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, http
 		ReadTimeout:    60 * time.Second,
 		WriteTimeout:   90 * time.Second,
 		MaxHeaderBytes: 1 << 20, // 2的20次方
+		TLSConfig: &tls.Config{
+			MinVersion:   tls.VersionTLS12,
+			CipherSuites: []uint16{tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256},
+		},
 	}
 	if https {
 		if err := server.ListenAndServeTLS(filepath.Join(dir, "server.crt"), filepath.Join(dir, "server.key")); err != nil {
