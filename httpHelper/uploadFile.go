@@ -22,7 +22,7 @@ func HttpFileUploadRequest(uri string, params map[string]string, path string) (*
 		return nil, err
 	}
 	_, err = io.Copy(part, file)
-	
+
 	for key, val := range params {
 		_ = writer.WriteField(key, val)
 	}

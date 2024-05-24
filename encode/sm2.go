@@ -3,7 +3,7 @@ package encode
 import (
 	"encoding/hex"
 	"errors"
-	
+
 	"github.com/tjfoc/gmsm/sm2"
 )
 

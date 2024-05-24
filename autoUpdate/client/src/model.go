@@ -2,9 +2,9 @@ package src
 
 import (
 	"path"
-	
+
 	_ "gopkg.in/yaml.v2"
-	
+
 	"github.com/feelingsray/Ray-Utils-Go/encode"
 	"github.com/feelingsray/Ray-Utils-Go/tools"
 )

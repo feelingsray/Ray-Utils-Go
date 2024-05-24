@@ -106,7 +106,7 @@ func (sc *ServerChannel) ListenUDP(fn func(packet []byte, localAddr, srcAddr *ne
 				}
 			}()
 			for {
-				var buf = make([]byte, 2048)
+				buf := make([]byte, 2048)
 				n, srcAddr, err := (*sc.UDPListener).ReadFromUDP(buf)
 				if err == nil {
 					packet := buf[0:n]

@@ -22,7 +22,7 @@ import (
 )
 
 func IoBind(dst io.ReadWriter, src io.ReadWriter, fn func(isSrcErr bool, err error), cfn func(count int, isPositive bool), bytesPreSec float64) {
-	var one = &sync.Once{}
+	one := &sync.Once{}
 	go func() {
 		defer func() {
 			if e := recover(); e != nil {
@@ -37,7 +37,7 @@ func IoBind(dst io.ReadWriter, src io.ReadWriter, fn func(isSrcErr bool, err err
 			_, isSrcErr, err = ioCopy(dst, newreader, func(c int) {
 				cfn(c, false)
 			})
-			
+
 		} else {
 			_, isSrcErr, err = ioCopy(dst, src, func(c int) {
 				cfn(c, false)
@@ -225,14 +225,13 @@ func Keygen() (err error) {
 }
 
 func GetAllInterfaceAddr() ([]net.IP, error) {
-	
 	ifaces, err := net.Interfaces()
 	if err != nil {
 		return nil, err
 	}
 	addresses := []net.IP{}
 	for _, iface := range ifaces {
-		
+
 		if iface.Flags&net.FlagUp == 0 {
 			continue // interface down
 		}
@@ -243,7 +242,7 @@ func GetAllInterfaceAddr() ([]net.IP, error) {
 		if err != nil {
 			continue
 		}
-		
+
 		for _, addr := range addrs {
 			var ip net.IP
 			switch v := addr.(type) {
@@ -265,7 +264,7 @@ func GetAllInterfaceAddr() ([]net.IP, error) {
 	if len(addresses) == 0 {
 		return nil, fmt.Errorf("no address Found, net.InterfaceAddrs: %v", addresses)
 	}
-	//only need first
+	// only need first
 	return addresses, nil
 }
 
@@ -298,7 +297,7 @@ func ReadUDPPacket(conn *net.Conn) (srcAddr string, packet []byte, err error) {
 		return
 	}
 	srcAddr = string(_srcAddr)
-	
+
 	err = binary.Read(reader, binary.LittleEndian, &bodyLength)
 	if err != nil {
 		return

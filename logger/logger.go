@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-	
+
 	"github.com/lestrrat-go/file-rotatelogs"
 	"github.com/sirupsen/logrus"
-	
+
 	"github.com/feelingsray/Ray-Utils-Go/tools"
 )
 

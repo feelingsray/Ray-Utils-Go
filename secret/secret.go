@@ -2,7 +2,7 @@ package secret
 
 import (
 	"github.com/tjfoc/gmsm/sm2"
-	
+
 	"github.com/feelingsray/Ray-Utils-Go/encode"
 )
 

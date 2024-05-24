@@ -9,7 +9,7 @@ import (
 )
 
 // 私钥生成
-//openssl genrsa -out rsa_private_key.pem 1024
+// openssl genrsa -out rsa_private_key.pem 1024
 var privateKey = []byte(`
 -----BEGIN RSA PRIVATE KEY-----
 MIICWwIBAAKBgQDcGsUIIAINHfRTdMmgGwLrjzfMNSrtgIf4EGsNaYwmC1GjF/bM
@@ -29,7 +29,7 @@ zncjRK3pbVkv0KrKfczuJiRlZ7dUzVO0b6QJr8TRAA==
 `)
 
 // 公钥: 根据私钥生成
-//openssl rsa -in rsa_private_key.pem -pubout -out rsa_public_key.pem
+// openssl rsa -in rsa_private_key.pem -pubout -out rsa_public_key.pem
 var publicKey = []byte(`
 -----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDcGsUIIAINHfRTdMmgGwLrjzfM
@@ -40,7 +40,7 @@ y682X1+R1lRK8D+vmQIDAQAB
 `)
 
 func RsaEncrypt(origData []byte) ([]byte, error) {
-	//解密pem格式的公钥
+	// 解密pem格式的公钥
 	block, _ := pem.Decode(publicKey)
 	if block == nil {
 		return nil, errors.New("public key error")
@@ -52,17 +52,17 @@ func RsaEncrypt(origData []byte) ([]byte, error) {
 	}
 	// 类型断言
 	pub := pubInterface.(*rsa.PublicKey)
-	//加密
+	// 加密
 	return rsa.EncryptPKCS1v15(rand.Reader, pub, origData)
 }
 
 func RsaDecrypt(ciphertext []byte) ([]byte, error) {
-	//解密
+	// 解密
 	block, _ := pem.Decode(privateKey)
 	if block == nil {
 		return nil, errors.New("private key error!")
 	}
-	//解析PKCS1格式的私钥
+	// 解析PKCS1格式的私钥
 	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
 		return nil, err

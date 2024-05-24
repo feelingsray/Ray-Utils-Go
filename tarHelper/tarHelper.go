@@ -99,7 +99,7 @@ func DeTarGzCompress(tarFile, dest string) error {
 }
 
 func createFile(name string) (*os.File, error) {
-	err := os.MkdirAll(string([]rune(name)[0:strings.LastIndex(name, "/")]), 0755)
+	err := os.MkdirAll(string([]rune(name)[0:strings.LastIndex(name, "/")]), 0o755)
 	if err != nil {
 		return nil, err
 	}

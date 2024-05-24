@@ -8,7 +8,7 @@ import (
 	"runtime/debug"
 	"strconv"
 	"time"
-	
+
 	"github.com/feelingsray/Ray-Utils-Go/rayProxy/utils"
 )
 
@@ -41,9 +41,9 @@ func (s *TCP) Start(args any) (err error) {
 	} else {
 		log.Fatalf("parent required for %s %s", s.cfg.Protocol(), *s.cfg.Local)
 	}
-	
+
 	s.InitService()
-	
+
 	host, port, _ := net.SplitHostPort(*s.cfg.Local)
 	p, _ := strconv.Atoi(port)
 	sc := utils.NewServerChannel(host, p)
@@ -116,11 +116,11 @@ func (s *TCP) OutToUDP(inConn *net.Conn) (err error) {
 	for {
 		srcAddr, body, err := utils.ReadUDPPacket(inConn)
 		if err == io.EOF || err == io.ErrUnexpectedEOF {
-			//log.Printf("connection %s released", srcAddr)
+			// log.Printf("connection %s released", srcAddr)
 			utils.CloseConn(inConn)
 			break
 		}
-		//log.Debugf("udp packet revecived:%s,%v", srcAddr, body)
+		// log.Debugf("udp packet revecived:%s,%v", srcAddr, body)
 		dstAddr, err := net.ResolveUDPAddr("udp", *s.cfg.Parent)
 		if err != nil {
 			log.Printf("can't resolve address: %s", err)
@@ -139,7 +139,7 @@ func (s *TCP) OutToUDP(inConn *net.Conn) (err error) {
 			log.Printf("send udp packet to %s fail,ERR:%s", dstAddr.String(), err)
 			continue
 		}
-		//log.Debugf("send udp packet to %s success", dstAddr.String())
+		// log.Debugf("send udp packet to %s success", dstAddr.String())
 		buf := make([]byte, 512)
 		len, _, err := conn.ReadFromUDP(buf)
 		if err != nil {
@@ -147,23 +147,22 @@ func (s *TCP) OutToUDP(inConn *net.Conn) (err error) {
 			continue
 		}
 		respBody := buf[0:len]
-		//log.Debugf("revecived udp packet from %s , %v", dstAddr.String(), respBody)
+		// log.Debugf("revecived udp packet from %s , %v", dstAddr.String(), respBody)
 		_, err = (*inConn).Write(utils.UDPPacket(srcAddr, respBody))
 		if err != nil {
 			log.Printf("send udp response fail ,ERR:%s", err)
 			utils.CloseConn(inConn)
 			break
 		}
-		//log.Printf("send udp response success ,from:%s", dstAddr.String())
+		// log.Printf("send udp response success ,from:%s", dstAddr.String())
 	}
 	return
-	
 }
 
 func (s *TCP) InitOutConnPool() {
 	if *s.cfg.ParentType == TYPE_TLS || *s.cfg.ParentType == TYPE_TCP {
-		//dur int, isTLS bool, certBytes, keyBytes []byte,
-		//parent string, timeout int, InitialCap int, MaxCap int
+		// dur int, isTLS bool, certBytes, keyBytes []byte,
+		// parent string, timeout int, InitialCap int, MaxCap int
 		s.outPool = utils.NewOutPool(
 			*s.cfg.CheckParentInterval,
 			*s.cfg.ParentType == TYPE_TLS,

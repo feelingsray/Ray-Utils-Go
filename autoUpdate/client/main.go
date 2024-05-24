@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"time"
-	
+
 	"github.com/feelingsray/Ray-Utils-Go/autoUpdate/client/src"
 )
 
@@ -20,5 +20,4 @@ func main() {
 		}
 		time.Sleep(1 * time.Hour)
 	}
-	
 }

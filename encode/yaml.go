@@ -2,7 +2,7 @@ package encode
 
 import (
 	"os"
-	
+
 	"gopkg.in/yaml.v2"
 )
 

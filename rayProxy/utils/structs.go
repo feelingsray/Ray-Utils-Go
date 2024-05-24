@@ -78,7 +78,7 @@ func (c *Checker) start() {
 			for _, v := range c.data.Items() {
 				go func(item CheckerItem) {
 					if c.isNeedCheck(item) {
-						//log.Printf("check %s", item.Domain)
+						// log.Printf("check %s", item.Domain)
 						var conn net.Conn
 						var err error
 						if item.IsHTTPS {
@@ -117,21 +117,21 @@ func (c *Checker) isNeedCheck(item CheckerItem) bool {
 
 func (c *Checker) IsBlocked(address string) (blocked bool, failN, successN uint) {
 	if c.domainIsInMap(address, true) {
-		//log.Printf("%s in blocked ? true", address)
+		// log.Printf("%s in blocked ? true", address)
 		return true, 0, 0
 	}
 	if c.domainIsInMap(address, false) {
-		//log.Printf("%s in direct ? true", address)
+		// log.Printf("%s in direct ? true", address)
 		return false, 0, 0
 	}
-	
+
 	_item, ok := c.data.Get(address)
 	if !ok {
-		//log.Printf("%s not in map, blocked true", address)
+		// log.Printf("%s not in map, blocked true", address)
 		return true, 0, 0
 	}
 	item := _item.(CheckerItem)
-	
+
 	return item.FailCount >= item.SuccessCount, item.FailCount, item.SuccessCount
 }
 
@@ -276,7 +276,7 @@ func NewHTTPRequest(inConn *net.Conn, bufSize int, isBasicAuth bool, basicAuth *
 	req.isBasicAuth = isBasicAuth
 	req.basicAuth = basicAuth
 	log.Printf("%s:%s", req.Method, req.hostOrURL)
-	
+
 	if req.IsHTTPS() {
 		err = req.HTTPS()
 	} else {
@@ -318,15 +318,14 @@ func (req *HTTPRequest) IsHTTPS() bool {
 }
 
 func (req *HTTPRequest) BasicAuth() (err error) {
-	
-	//log.Printf("request :%s", string(b[:n]))
+	// log.Printf("request :%s", string(b[:n]))
 	authorization, err := req.getHeader("Authorization")
 	if err != nil {
 		fmt.Fprint(*req.conn, "HTTP/1.1 401 Unauthorized\r\nWWW-Authenticate: Basic realm=\"\"\r\n\r\nUnauthorized")
 		CloseConn(req.conn)
 		return
 	}
-	//log.Printf("Authorization:%s", authorization)
+	// log.Printf("Authorization:%s", authorization)
 	basic := strings.Fields(authorization)
 	if len(basic) != 2 {
 		err = fmt.Errorf("authorization data error,ERR:%s", authorization)
@@ -340,7 +339,7 @@ func (req *HTTPRequest) BasicAuth() (err error) {
 		return
 	}
 	authOk := (*req.basicAuth).Check(string(user))
-	//log.Printf("auth %s,%v", string(user), authOk)
+	// log.Printf("auth %s,%v", string(user), authOk)
 	if !authOk {
 		fmt.Fprint(*req.conn, "HTTP/1.1 401 Unauthorized\r\n\r\nUnauthorized")
 		CloseConn(req.conn)
@@ -381,14 +380,14 @@ func (req *HTTPRequest) getHeader(key string) (val string, err error) {
 }
 
 func (req *HTTPRequest) addPortIfNot() (newHost string) {
-	//newHost = req.Host
+	// newHost = req.Host
 	port := "80"
 	if req.IsHTTPS() {
 		port = "443"
 	}
 	if (!strings.HasPrefix(req.Host, "[") && strings.Index(req.Host, ":") == -1) || (strings.HasPrefix(req.Host, "[") && strings.HasSuffix(req.Host, "]")) {
-		//newHost = req.Host + ":" + port
-		//req.headBuf = []byte(strings.Replace(string(req.headBuf), req.Host, newHost, 1))
+		// newHost = req.Host + ":" + port
+		// req.headBuf = []byte(strings.Replace(string(req.headBuf), req.Host, newHost, 1))
 		req.Host = req.Host + ":" + port
 	}
 	return

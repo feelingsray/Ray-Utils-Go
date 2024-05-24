@@ -30,7 +30,7 @@ func (c *LRUCache) Set(key string, value any) {
 		ee.Value.(*entry).value = value
 		return
 	}
-	
+
 	// 将新添加的缓存项放入双向链表的最前端
 	ele := c.ll.PushFront(&entry{key, value})
 	c.cache[key] = ele
@@ -105,7 +105,7 @@ func (c *LRUCache) GetKeys() []string {
 		return nil
 	}
 	keys := make([]string, 0)
-	for k, _ := range c.cache {
+	for k := range c.cache {
 		keys = append(keys, k)
 	}
 	return keys

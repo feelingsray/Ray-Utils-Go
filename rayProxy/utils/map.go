@@ -198,12 +198,12 @@ func fanIn(chans []chan Tuple, out chan Tuple) {
 // Items returns all items as map[string]any
 func (m ConcurrentMap) Items() map[string]any {
 	tmp := make(map[string]any)
-	
+
 	// Insert items to temporary map.
 	for item := range m.IterBuffered() {
 		tmp[item.Key] = item.Val
 	}
-	
+
 	return tmp
 }
 
@@ -242,7 +242,7 @@ func (m ConcurrentMap) Keys() []string {
 		wg.Wait()
 		close(ch)
 	}()
-	
+
 	// Generate keys
 	keys := make([]string, 0, count)
 	for k := range ch {
@@ -254,7 +254,7 @@ func (m ConcurrentMap) Keys() []string {
 func (m ConcurrentMap) MarshalJSON() ([]byte, error) {
 	// Create a temporary map, which will hold all item spread across shards.
 	tmp := make(map[string]any)
-	
+
 	// Insert items to temporary map.
 	for item := range m.IterBuffered() {
 		tmp[item.Key] = item.Val

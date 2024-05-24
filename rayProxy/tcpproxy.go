@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"path"
 	"syscall"
-	
+
 	"github.com/feelingsray/Ray-Utils-Go/encode"
 	"github.com/feelingsray/Ray-Utils-Go/rayProxy/services"
 	"github.com/feelingsray/Ray-Utils-Go/tools"
@@ -52,7 +52,7 @@ func main() {
 		}
 		runServiceList = append(runServiceList, service)
 	}
-	//select {}
+	// select {}
 	signalChan := make(chan os.Signal, 1)
 	cleanupDone := make(chan bool)
 	signal.Notify(signalChan,
@@ -62,7 +62,7 @@ func main() {
 		syscall.SIGTERM,
 		syscall.SIGQUIT)
 	go func() {
-		for _ = range signalChan {
+		for range signalChan {
 			fmt.Println("\nReceived an interrupt, stopping services...")
 			for _, service := range runServiceList {
 				(service.S).Clean()

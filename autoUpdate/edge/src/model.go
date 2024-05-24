@@ -2,7 +2,7 @@ package src
 
 import (
 	"path"
-	
+
 	"github.com/feelingsray/Ray-Utils-Go/encode"
 	"github.com/feelingsray/Ray-Utils-Go/tools"
 )
@@ -27,7 +27,7 @@ func LoadEdgeConf() (*EdgeConf, error) {
 		return nil, err
 	}
 	conf.Env.SourcePath = path.Join(appPath, "releases")
-	
+
 	if ok, _ := tools.PathExists(conf.Env.SourcePath); !ok {
 		err = tools.CreateDir(conf.Env.SourcePath)
 		if err != nil {

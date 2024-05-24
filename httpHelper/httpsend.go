@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"io"
 	"net/http"
-	
+
 	"github.com/feelingsray/Ray-Utils-Go/encode"
 )
 
@@ -24,7 +24,6 @@ func HttpPostWithAuth(url string, body any, username string, password string) (i
 	defer resp.Body.Close()
 	respBody, _ := io.ReadAll(resp.Body)
 	return resp.StatusCode, string(respBody), nil
-	
 }
 
 func HttpPost(url string, body any) (int, string, error) {
@@ -36,14 +35,12 @@ func HttpPost(url string, body any) (int, string, error) {
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	
 	if err != nil {
 		return 500, "", err
 	}
 	defer resp.Body.Close()
 	respBody, _ := io.ReadAll(resp.Body)
 	return resp.StatusCode, string(respBody), nil
-	
 }
 
 func HttpGet(url string) (int, string, error) {
@@ -57,5 +54,4 @@ func HttpGet(url string) (int, string, error) {
 	defer resp.Body.Close()
 	respBody, _ := io.ReadAll(resp.Body)
 	return resp.StatusCode, string(respBody), nil
-	
 }

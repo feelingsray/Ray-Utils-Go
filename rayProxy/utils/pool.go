@@ -28,7 +28,7 @@ func NewConnPool(poolConfig poolConfig) (pool ConnPool, err error) {
 		conns:  make(chan any, poolConfig.MaxCap),
 		lock:   &sync.Mutex{},
 	}
-	//log.Printf("pool MaxCap:%d", poolConfig.MaxCap)
+	// log.Printf("pool MaxCap:%d", poolConfig.MaxCap)
 	if poolConfig.MaxCap > 0 {
 		err = p.initAutoFill(false)
 		if err == nil {
@@ -45,9 +45,9 @@ type netPool struct {
 }
 
 func (p *netPool) initAutoFill(async bool) (err error) {
-	var worker = func() (err error) {
+	worker := func() (err error) {
 		for {
-			//log.Printf("pool fill: %v , len: %d", p.Len() <= p.config.InitialCap/2, p.Len())
+			// log.Printf("pool fill: %v , len: %d", p.Len() <= p.config.InitialCap/2, p.Len())
 			if p.Len() <= p.config.InitialCap/2 {
 				p.lock.Lock()
 				errN := 0
@@ -89,7 +89,6 @@ func (p *netPool) initAutoFill(async bool) (err error) {
 		err = worker()
 	}
 	return
-	
 }
 
 func (p *netPool) Get() (conn any, err error) {
@@ -140,7 +139,6 @@ func (p *netPool) ReleaseAll() {
 		p.config.Release(c)
 	}
 	p.conns = make(chan any, p.config.InitialCap)
-	
 }
 
 func (p *netPool) Len() (length int) {

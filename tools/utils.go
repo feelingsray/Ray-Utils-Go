@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-	
+
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -52,7 +52,7 @@ func Substr(str string, start, length int) string {
 	}
 	rune_str := []rune(str)
 	len_str := len(rune_str)
-	
+
 	if start < 0 {
 		start = len_str + start
 	}
@@ -150,7 +150,7 @@ func Cmp(src []string, dest []string) ([]string, []string, []string) {
 		delete(mall, v)
 	}
 	var added, deleted []string
-	for v, _ := range mall {
+	for v := range mall {
 		_, exist := msrc[v]
 		if exist {
 			deleted = append(deleted, v)
@@ -166,7 +166,7 @@ func Struct2Map(obj any) (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
-	var m = make(map[string]any)
+	m := make(map[string]any)
 	if err = json.Unmarshal(data, &m); err != nil {
 		return nil, err
 	}

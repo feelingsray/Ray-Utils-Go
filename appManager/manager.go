@@ -19,7 +19,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	
+
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/ledisdb/ledisdb/config"
@@ -30,7 +30,7 @@ import (
 	"github.com/shirou/gopsutil/v3/load"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/process"
-	
+
 	"github.com/feelingsray/Ray-Utils-Go/encode"
 	"github.com/feelingsray/Ray-Utils-Go/netHelper"
 	"github.com/feelingsray/Ray-Utils-Go/rotp"
@@ -84,7 +84,8 @@ type ExtProc struct {
 
 // NewAppManager 初始化一个管理对象
 func NewAppManager(appCode string, port int, registerApi RegisterManagerApi, initCallBack AppInitCallBack,
-	doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack, sysDir string, debug bool) (*AppManager, error) {
+	doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack, sysDir string, debug bool,
+) (*AppManager, error) {
 	manager := new(AppManager)
 	manager.SuperAuth = SuperAuth
 	manager.firstRun = true
@@ -309,7 +310,7 @@ func (p *AppManager) RestartProcAfterInit() error {
 			time.Sleep(1 * time.Millisecond)
 		}
 	}
-	
+
 	if !p.firstRun {
 		// 清除注册服务
 		p.ClearAllProc()
@@ -319,7 +320,7 @@ func (p *AppManager) RestartProcAfterInit() error {
 			return errors.New("销毁资源失败:" + err.Error())
 		}
 	}
-	
+
 	// 关闭第一次启动
 	p.firstRun = false
 	// 重新初始化
@@ -631,8 +632,8 @@ func (p *AppManager) cors() gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE,OPTIONS")
 		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type")
 		c.Header("Access-Control-Allow-Credentials", "true")
-		
-		//放行所有OPTIONS方法
+
+		// 放行所有OPTIONS方法
 		if method == "OPTIONS" {
 			c.AbortWithStatus(http.StatusNoContent)
 		}
@@ -694,7 +695,6 @@ func (p *AppManager) basicAuth(username string, pwd string, dt int64, mySecret [
 		}
 	}
 	return false, errors.New("用户非OTP用户或Super用户"), ""
-	
 }
 
 /********************** 扩展方法 ****************/
@@ -800,9 +800,9 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 		}
 	}
 	psInfo["ip"] = ip
-	
+
 	processInfo, _ := process.Processes()
-	
+
 	var processCpuList ProcessResourcesSlice
 	var processMemList ProcessResourcesSlice
 	for _, processOne := range processInfo {
@@ -814,7 +814,7 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 		if err != nil {
 			fmt.Println(err)
 		}
-		
+
 		pc := new(ProcessResources)
 		pc.Pid = processOne.Pid
 		pc.Name = pName
@@ -823,7 +823,7 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 		if err != nil {
 			fmt.Println(err)
 		}
-		
+
 		pm := new(ProcessResources)
 		pm.Pid = processOne.Pid
 		pm.Name = pName
@@ -833,13 +833,13 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 			fmt.Println(err)
 		}
 		pm.Resources = float64(pMem)
-		
+
 		processCpuList = append(processCpuList, *pc)
 		processMemList = append(processMemList, *pm)
 	}
 	sort.Stable(processCpuList)
 	sort.Stable(processMemList)
-	
+
 	if len(processCpuList) > processTop && processCpuList != nil {
 		processCpuList = processCpuList[:processTop]
 	}
@@ -853,7 +853,7 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 		cpuTopX = append(cpuTopX, tmp)
 	}
 	psInfo["cpu_top"] = cpuTopX
-	
+
 	if len(processMemList) > processTop && processMemList != nil {
 		processMemList = processMemList[:processTop]
 	}
@@ -867,7 +867,7 @@ func (p *AppManager) GetPSInfo(processTop int) map[string]any {
 		memTopX = append(memTopX, tmp)
 	}
 	psInfo["mem_top"] = memTopX
-	
+
 	return psInfo
 }
 
@@ -890,7 +890,7 @@ func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS
 			})
 		}
 	}
-	
+
 	_, err := fs.ReadFile("index.html")
 	if webPath == "" && err == nil {
 		p.engRouter.StaticFS("/ui", http.FS(fs))
@@ -901,14 +901,14 @@ func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS
 			c.FileFromFS("index.html", http.FS(fs))
 		})
 	}
-	
+
 	// 源数据文件下载路径
 	rawPath := "/jylink/raw"
 	if ok, _ := tools.PathExists(rawPath); ok {
 		// 加载静态页面
 		p.engRouter.StaticFS("/raw", http.Dir(rawPath))
 	}
-	//dl文件下载路径
+	// dl文件下载路径
 	dlPath := "/jylink/download"
 	if ok, _ := tools.PathExists(dlPath); ok {
 		// 加载静态页面
@@ -993,7 +993,7 @@ func (p *AppManager) Manager(webPath string, version map[string]any, fs embed.FS
 		WriteTimeout:   90 * time.Second,
 		MaxHeaderBytes: 1 << 20, // 2的20次方
 		TLSConfig: &tls.Config{
-		 	MinVersion:   tls.VersionTLS12,
+			MinVersion:   tls.VersionTLS12,
 			CipherSuites: []uint16{tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256},
 		},
 	}

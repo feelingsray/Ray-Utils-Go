@@ -3,7 +3,7 @@ package rotp
 import (
 	"fmt"
 	"time"
-	
+
 	"github.com/xlzd/gotp"
 )
 
@@ -117,7 +117,7 @@ func RTOTPVerify(code string, mySecretList []string) (bool, string) {
 			secret = append(secret, myS)
 		}
 	}
-	
+
 	for _, s := range secret {
 		mySecret := fmt.Sprintf("RAY2%sPYY4%s", s[:4], s[4:])
 		totp := gotp.NewTOTP(mySecret, 6, 30, nil)

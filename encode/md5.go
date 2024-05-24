@@ -17,12 +17,12 @@ func MD5Bytes(s []byte) string {
 	return hex.EncodeToString(ret[:])
 }
 
-//MD5 计算字符串MD5值
+// MD5 计算字符串MD5值
 func MD5(s string) string {
 	return MD5Bytes([]byte(s))
 }
 
-//MD5File 计算文件MD5值
+// MD5File 计算文件MD5值
 func MD5File(file string) string {
 	data, err := os.ReadFile(file)
 	if err != nil {
