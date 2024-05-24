@@ -24,8 +24,10 @@ type Integral struct {
 	hisFunc    dealHisAlarmItem
 }
 
-type dealRealAlarmItem func(alarmItem *AlarmItem) error
-type dealHisAlarmItem func(alarmItem *AlarmItem) error
+type (
+	dealRealAlarmItem func(alarmItem *AlarmItem) error
+	dealHisAlarmItem  func(alarmItem *AlarmItem) error
+)
 
 func (integral *Integral) Init(host string, port int, password string, dbNum int, realFunc dealRealAlarmItem, hisFunc dealHisAlarmItem) error {
 	integral.RedisConf.Host = host
@@ -251,7 +253,8 @@ func (integral *Integral) Calculate(tagCode string, newTag *TagReal, dbTag *TagS
 }
 
 func (integral *Integral) dealAlarmTag(tagCode string, alarmType string,
-	newTag *TagReal, dbTag *TagStatic) (*AlarmItem, error) {
+	newTag *TagReal, dbTag *TagStatic,
+) (*AlarmItem, error) {
 	alarmItem, err := integral.getAlarmItem(tagCode, alarmType)
 	if err != nil {
 		return nil, nil
@@ -345,7 +348,8 @@ func (integral *Integral) dealAlarmTag(tagCode string, alarmType string,
 }
 
 func (integral *Integral) dealNormalTag(tagCode string, alarmType string,
-	newTag *TagReal) (*AlarmItem, error) {
+	newTag *TagReal,
+) (*AlarmItem, error) {
 	alarmItem, err := integral.getAlarmItem(tagCode, alarmType)
 	if err != nil {
 		return nil, err

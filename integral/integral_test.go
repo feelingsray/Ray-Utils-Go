@@ -11,9 +11,11 @@ func TestIntegral(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
-	static := &TagStatic{"tag01", "float", "-9999", "1",
+	static := &TagStatic{
+		"tag01", "float", "-9999", "1",
 		-9999, -9999, 40, 30,
-		70, -9999, -9999, -9999}
+		70, -9999, -9999, -9999,
+	}
 	baseTimestamp := int64(1683877950)
 	valueList := []float64{0, 15, 30, 45, 60, 75, 90, 115, 110, 101, 100, 85, 75, 65, 55, 10}
 
@@ -31,7 +33,7 @@ func TestIntegral(t *testing.T) {
 }
 
 func DealReal(alarmItem *AlarmItem) error {
-	//fmt.Println(fmt.Sprintf("real:%+v", alarmItem))
+	// fmt.Println(fmt.Sprintf("real:%+v", alarmItem))
 	return nil
 }
 

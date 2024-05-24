@@ -49,7 +49,7 @@ func CopyFile(dstName string, srcName string) error {
 		return err
 	}
 	defer src.Close()
-	dst, err := os.OpenFile(dstName, os.O_WRONLY|os.O_CREATE, 0755)
+	dst, err := os.OpenFile(dstName, os.O_WRONLY|os.O_CREATE, 0o755)
 	if err != nil {
 		return err
 	}

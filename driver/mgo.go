@@ -40,7 +40,7 @@ func (m *MongoStore) GetSession() error {
 	if err != nil {
 		return err
 	}
-	//defer session.Close()
+	// defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	m.Session = session
 	return nil
@@ -54,5 +54,4 @@ func (m *MongoStore) DBStore(dbname string) (*mgo.Database, error) {
 		}
 	}
 	return m.Session.DB(dbname), nil
-
 }

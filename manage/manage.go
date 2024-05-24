@@ -81,7 +81,8 @@ type ExtProc struct {
 
 // NewAppManage 初始化一个管理对象
 func NewAppManage(appCode string, port int, mApi RegisterManageApi, pApi RegisterProxyApi, feApi RegisterFeApi, initCallBack AppInitCallBack,
-	doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack, sysDir string, debug bool) (*AppManage, error) {
+	doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack, sysDir string, debug bool,
+) (*AppManage, error) {
 	manager := new(AppManage)
 	manager.SuperAuth = SuperAuth
 	manager.firstRun = true
@@ -637,7 +638,7 @@ func (p *AppManage) cors() gin.HandlerFunc {
 		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type")
 		c.Header("Access-Control-Allow-Credentials", "true")
 
-		//放行所有OPTIONS方法
+		// 放行所有OPTIONS方法
 		if method == "OPTIONS" {
 			c.AbortWithStatus(http.StatusNoContent)
 		}
@@ -699,7 +700,6 @@ func (p *AppManage) basicAuth(username, pwd string, dt int64, mySecret []string)
 		}
 	}
 	return false, errors.New("用户非OTP用户或Super用户"), ""
-
 }
 
 /********************** 扩展方法 ****************/
@@ -910,7 +910,7 @@ func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, http
 		// 加载静态页面
 		p.engRouter.StaticFS("/raw", http.Dir(rawPath))
 	}
-	//dl文件下载路径
+	// dl文件下载路径
 	dlPath := "/jyaiot/download"
 	if ok, _ := tools.PathExists(dlPath); ok {
 		// 加载静态页面
@@ -960,7 +960,7 @@ func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, http
 	mapi.GET("/extProc/list", p.getExtProcListApi)
 	// 注入外部ManageAPI接口
 	p.registerManageApi(mapi)
-	//注入外部FeAPI接口
+	// 注入外部FeAPI接口
 	p.registerFeApi(feApi)
 	if p.registerProxyApi != nil {
 		papi := p.engRouter.Group("/")

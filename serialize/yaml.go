@@ -2,7 +2,7 @@ package serialize
 
 import (
 	"os"
-	
+
 	"gopkg.in/yaml.v2"
 )
 

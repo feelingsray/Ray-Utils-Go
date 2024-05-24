@@ -31,7 +31,7 @@ func RunStrings(tokens ...string) (string, error) {
 	if err := runCmds(cmds); err != nil {
 		return "", fmt.Errorf("%s; %s", err.Error(), string(buf.Bytes()))
 	}
-	
+
 	b := buf.Bytes()
 	return string(b), nil
 }

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"crypto/cipher"
 	"encoding/hex"
-	
+
 	"github.com/ivanlebron/gmsm/sm4"
 )
 
@@ -31,7 +31,6 @@ func (s *SM4Crypt) Encrypt(data string) (string, error) {
 	blockMode := cipher.NewCBCEncrypter(block, s.key[:block.BlockSize()])
 	blockMode.CryptBlocks(dst, newsrc)
 	return hex.EncodeToString(dst), nil
-	
 }
 
 func (s *SM4Crypt) Decrypt(data string) (string, error) {

@@ -1,13 +1,14 @@
 package secret
 
 import (
-	"github.com/feelingsray/ray-utils-go/v2/serialize"
-	"github.com/spf13/cast"
 	"log"
 	"testing"
 	"time"
 
 	"github.com/ivanlebron/gmsm/sm2"
+	"github.com/spf13/cast"
+
+	"github.com/feelingsray/ray-utils-go/v2/serialize"
 )
 
 func TestNewSecretCrypt(t *testing.T) {
@@ -26,7 +27,7 @@ func TestNewSecretCrypt(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		//t.Log(encrypt)
+		// t.Log(encrypt)
 
 		decrypt, err := crypt.Decrypt(encrypt, "sm2")
 		if err != nil {
@@ -34,7 +35,7 @@ func TestNewSecretCrypt(t *testing.T) {
 		}
 		_, _ = encrypt, decrypt
 	}
-	//t.Log(decrypt)
+	// t.Log(decrypt)
 	time.Since(start)
 }
 

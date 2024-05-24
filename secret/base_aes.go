@@ -20,7 +20,7 @@ func NewAES() *AESCrypt {
 }
 
 func (a *AESCrypt) encrypt(data string) (string, error) {
-	//var block cipher.Block
+	// var block cipher.Block
 	block, err := aes.NewCipher(a.key)
 	if err != nil {
 		return "", err
@@ -33,7 +33,7 @@ func (a *AESCrypt) encrypt(data string) (string, error) {
 }
 
 func (a *AESCrypt) decrypt(data string) (string, error) {
-	//var block cipher.Block
+	// var block cipher.Block
 	block, err := aes.NewCipher(a.key)
 	if err != nil {
 		return "", err
