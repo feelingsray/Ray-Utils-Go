@@ -10,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -48,7 +47,7 @@ var SuperAuth = map[string]string{
 	"fwoeu9tp":  "lD#APTP#72e4#7", // 小厂的第三方平台
 }
 
-var VERSION = "1.2.0"
+var VERSION = "2.0.0"
 
 type ProcStat string
 
@@ -111,12 +110,12 @@ func NewAppManage(appCode string, port int, mApi RegisterManageApi, pApi Registe
 	amInfo.Version = VERSION
 	amInfo.SysDir = sysDir
 	if amInfo.SysDir == "" {
-		amInfo.SysDir = path.Join(tools.GetAppPath(), "X3589")
+		amInfo.SysDir = filepath.Join(tools.GetAppPath(), "X3589")
 	}
 	amInfo.AppDir = tools.GetAppPath()
 	manager.ManageInfo = amInfo
 	cachedCfg := config.NewConfigDefault()
-	cachedCfg.DataDir = path.Join(amInfo.SysDir, appCode, "cached")
+	cachedCfg.DataDir = filepath.Join(amInfo.SysDir, appCode, "cached")
 	ledisDb, err := ledis.Open(cachedCfg)
 	if err != nil {
 		return nil, fmt.Errorf("创建缓存失败:%s", err.Error())
@@ -235,7 +234,7 @@ func (p *AppManage) GetProcStatusByCode(code string) ProcStat {
 
 // GetProcStatus 获取所有内部服务状态
 func (p *AppManage) GetProcStatus() map[string]*Proc {
-	serviceList := make(map[string]*Proc, 0)
+	serviceList := make(map[string]*Proc)
 	for key, value := range p.procStore.Items() {
 		serviceList[key] = value
 	}
@@ -491,18 +490,18 @@ func (p *AppManage) restartProcApi(c *gin.Context) {
 		// 全部重启
 		err := p.RestartProcAfterInit()
 		if err != nil {
-			c.JSON(500, err.Error())
+			c.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
-		c.JSON(200, "发送全部服务重启指令......")
+		c.JSON(http.StatusOK, "发送全部服务重启指令......")
 		return
 	} else {
 		proc, err := p.RestartProcByCode(code)
 		if err != nil {
-			c.JSON(500, err.Error())
+			c.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
-		c.JSON(200, proc)
+		c.JSON(http.StatusOK, proc)
 		return
 	}
 }
@@ -510,11 +509,11 @@ func (p *AppManage) restartProcApi(c *gin.Context) {
 func (p *AppManage) stopProcApi(c *gin.Context) {
 	code := c.Query("code")
 	if code == "" {
-		c.JSON(500, "服务编码不能为空")
+		c.JSON(http.StatusInternalServerError, "服务编码不能为空")
 		return
 	} else {
 		p.StopProcByCode(code)
-		c.JSON(200, fmt.Sprintf("发送停止指令:%s", code))
+		c.JSON(http.StatusOK, fmt.Sprintf("发送停止指令:%s", code))
 		return
 	}
 }
@@ -527,7 +526,7 @@ func (p *AppManage) getProcListApi(c *gin.Context) {
 	}
 	data["proc_list"] = serviceList
 	data["proc_count"] = runtime.NumGoroutine()
-	c.JSON(200, data)
+	c.JSON(http.StatusOK, data)
 	return
 }
 
@@ -535,15 +534,15 @@ func (p *AppManage) addProcApi(c *gin.Context) {
 	code := c.Query("code")
 	name := c.Query("name")
 	if code == "" || name == "" {
-		c.JSON(500, "code和name不能为空")
+		c.JSON(http.StatusInternalServerError, "code和name不能为空")
 		return
 	}
 	err := p.RegisterProc(code, name)
 	if err != nil {
-		c.JSON(500, err.Error())
+		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(200, "注册服务成功")
+	c.JSON(http.StatusOK, "注册服务成功")
 	return
 }
 
@@ -554,10 +553,10 @@ func (p *AppManage) deleteProcApi(c *gin.Context) {
 	code := c.Query("code")
 	err := p.DeleteProc(code)
 	if err != nil {
-		c.JSON(500, err.Error())
+		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(200, "删除服务成功")
+	c.JSON(http.StatusOK, "删除服务成功")
 	return
 }
 
@@ -567,7 +566,7 @@ func (p *AppManage) getExtProcListApi(c *gin.Context) {
 	for key, value := range p.extProcStore.Items() {
 		serviceList[key] = value
 	}
-	c.JSON(200, serviceList)
+	c.JSON(http.StatusOK, serviceList)
 	return
 }
 
@@ -575,11 +574,10 @@ func (p *AppManage) getExtProcListApi(c *gin.Context) {
 func (p *AppManage) login(c *gin.Context) {
 	resp := make(map[string]any)
 	req := make(map[string]string)
-	err := c.BindJSON(&req)
-	if err != nil {
-		resp["code"] = 500
+	if err := c.BindJSON(&req); err != nil {
+		resp["code"] = http.StatusInternalServerError
 		resp["msg"] = "序列化参数失败"
-		c.JSON(500, resp)
+		c.JSON(http.StatusInternalServerError, resp)
 		return
 	}
 	username, un := req["username"]
@@ -587,16 +585,16 @@ func (p *AppManage) login(c *gin.Context) {
 	timestamp, dt := req["timestamp"]
 	mySecret, myS := req["secret"]
 	if (un == false) || (pwd == false) || (dt == false) {
-		resp["code"] = 500
+		resp["code"] = http.StatusInternalServerError
 		resp["msg"] = "用户名、密码或客户端时间未传值"
-		c.JSON(500, resp)
+		c.JSON(http.StatusInternalServerError, resp)
 		return
 	}
 	tt, err := strconv.Atoi(timestamp)
 	if err != nil {
-		resp["code"] = 500
+		resp["code"] = http.StatusInternalServerError
 		resp["msg"] = "非法的时间戳"
-		c.JSON(500, resp)
+		c.JSON(http.StatusInternalServerError, resp)
 		return
 	}
 	mySecretList := make([]string, 0)
@@ -605,18 +603,18 @@ func (p *AppManage) login(c *gin.Context) {
 	}
 	ok, err, key := p.basicAuth(username, password, int64(tt), mySecretList)
 	if err != nil {
-		resp["code"] = 500
+		resp["code"] = http.StatusInternalServerError
 		resp["msg"] = fmt.Sprintf("登录失败:%s", err.Error())
-		c.JSON(200, resp)
+		c.JSON(http.StatusOK, resp)
 		return
 	}
 	if !ok {
-		resp["code"] = 401
+		resp["code"] = http.StatusUnauthorized
 		resp["msg"] = fmt.Sprintf("登录失败:用户名或密码不正确")
-		c.JSON(401, resp)
+		c.JSON(http.StatusUnauthorized, resp)
 		return
 	}
-	resp["code"] = 200
+	resp["code"] = http.StatusOK
 	info := make(map[string]any)
 	info["username"] = username
 	info["user_key"] = key
@@ -624,7 +622,7 @@ func (p *AppManage) login(c *gin.Context) {
 	info["role"] = "super"
 	info["app_code"] = p.AppCode
 	resp["data"] = info
-	c.JSON(200, resp)
+	c.JSON(http.StatusOK, resp)
 	return
 }
 
@@ -717,7 +715,7 @@ func (p *AppManage) GetCachedAll(key string) (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	data := make(map[string]string, 0)
+	data := make(map[string]string)
 	for _, v := range fv {
 		data[string(v.Field)] = string(v.Value)
 	}
@@ -919,19 +917,19 @@ func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, http
 		p.engRouter.StaticFS("/dl", http.Dir(dlPath))
 	}
 	p.engRouter.GET("/version", func(c *gin.Context) {
-		c.JSON(200, version)
+		c.JSON(http.StatusOK, version)
 		return
 	})
 	feApi := p.engRouter.Group("/fe")
 	mapi := p.engRouter.Group("/mapi")
 	mapi.GET("/version", func(c *gin.Context) {
-		mapiVersion := make(map[string]any, 0)
+		mapiVersion := make(map[string]any)
 		mapiVersion["version"] = p.ManageInfo.Version
-		c.JSON(200, mapiVersion)
+		c.JSON(http.StatusOK, mapiVersion)
 		return
 	})
 	mapi.GET("/info", func(c *gin.Context) {
-		info := make(map[string]any, 0)
+		info := make(map[string]any)
 		info["version"] = p.ManageInfo.Version
 		info["copyright"] = p.ManageInfo.Version
 		info["author"] = p.ManageInfo.Author
@@ -941,11 +939,11 @@ func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, http
 		for k, v := range psInfo {
 			info[k] = v
 		}
-		c.JSON(200, info)
+		c.JSON(http.StatusOK, info)
 		return
 	})
 	mapi.GET("/psinfo", func(c *gin.Context) {
-		c.JSON(200, p.GetPSInfo(5))
+		c.JSON(http.StatusOK, p.GetPSInfo(5))
 		return
 	})
 	// 公共登录接口
