@@ -186,40 +186,35 @@ func (p *AppManage) ClearAllProc() {
 }
 
 // DeleteProc 删除内部服务
-func (p *AppManage) DeleteProc(code string) error {
+func (p *AppManage) DeleteProc(code string) {
 	_, exist := p.procStore.Get(code)
 	if exist {
 		p.procStore.Remove(code)
-		return nil
-	} else {
-		return errors.New("服务不存在")
 	}
 }
 
 // SetProcStatus 设置内部服务状态
-func (p *AppManage) SetProcStatus(code string, status ProcStat) error {
+func (p *AppManage) SetProcStatus(code string, status ProcStat) {
 	old, exist := p.procStore.Get(code)
 	if !exist {
-		return fmt.Errorf("未注册服务:%s", code)
+		return
 	} else {
 		proc := old
 		proc.Status = status
 		if status == ProcRun {
 			proc.StartTime = time.Now().Unix()
 		}
-		return nil
 	}
 }
 
 // SetProcHeartTime 设置内部服务心跳
-func (p *AppManage) SetProcHeartTime(code string) error {
+func (p *AppManage) SetProcHeartTime(code string) {
 	old, exist := p.procStore.Get(code)
 	if !exist {
-		return fmt.Errorf("未注册服务:%s", code)
+		return
 	} else {
 		proc := old
 		proc.HeartTime = time.Now().Unix()
-		return nil
 	}
 }
 
@@ -538,11 +533,7 @@ func (p *AppManage) addProcApi(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, "code和name不能为空")
 		return
 	}
-	err := p.RegisterProc(code, name)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
-		return
-	}
+	p.RegisterProc(code, name)
 	c.JSON(http.StatusOK, "注册服务成功")
 	return
 }
@@ -552,11 +543,7 @@ func (p *AppManage) deleteProcApi(c *gin.Context) {
 	p.stopProcApi(c)
 	// 然后从服务列表中删除这个服务
 	code := c.Query("code")
-	err := p.DeleteProc(code)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
-		return
-	}
+	p.DeleteProc(code)
 	c.JSON(http.StatusOK, "删除服务成功")
 	return
 }
