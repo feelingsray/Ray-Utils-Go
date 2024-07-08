@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
@@ -112,6 +113,11 @@ func NewAppManage(appCode string, port int, mApi RegisterManageApi, pApi Registe
 	amInfo.SysDir = sysDir
 	if amInfo.SysDir == "" {
 		amInfo.SysDir = filepath.Join(tools.GetAppPath(), "X3589")
+		if _, err := os.Stat(amInfo.SysDir); !os.IsNotExist(err) {
+			if err = os.RemoveAll(amInfo.SysDir); err != nil {
+				return nil, err
+			}
+		}
 	}
 	amInfo.AppDir = tools.GetAppPath()
 	manager.ManageInfo = amInfo
