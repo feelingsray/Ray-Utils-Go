@@ -2,6 +2,7 @@ package manage
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"embed"
 	"encoding/base64"
@@ -84,29 +85,30 @@ type ExtProc struct {
 func NewAppManage(appCode string, port int, mApi RegisterManageApi, pApi RegisterProxyApi, feApi RegisterFeApi, initCallBack AppInitCallBack,
 	doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack, sysDir string, debug bool,
 ) (*AppManage, error) {
-	manager := new(AppManage)
-	manager.SuperAuth = SuperAuth
-	manager.firstRun = true
-	manager.AppCode = appCode
-	manager.Debug = debug
+	manage := new(AppManage)
+	manage.SuperAuth = SuperAuth
+	manage.firstRun = true
+	manage.AppCode = appCode
+	manage.Debug = debug
 	if port < 3000 && port != 443 && port != 80 {
 		port = 8888
 	}
-	manager.port = port
-	manager.procStore = cmap.New[*Proc]()
-	manager.extProcStore = cmap.New[*ExtProc]()
+	manage.port = port
+	manage.procStore = cmap.New[*Proc]()
+	manage.extProcStore = cmap.New[*ExtProc]()
 	if debug {
 		gin.SetMode(gin.DebugMode)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 	}
-	manager.engRouter = gin.New()
-	manager.registerManageApi = mApi
-	manager.registerProxyApi = pApi
-	manager.registerFeApi = feApi
-	manager.initCallBack = initCallBack
-	manager.doCallBack = doCallBack
-	manager.destroyCallBack = destroyCallBack
+	manage.engRouter = gin.New()
+	manage.registerManageApi = mApi
+	manage.registerProxyApi = pApi
+	manage.registerFeApi = feApi
+	manage.initCallBack = initCallBack
+	manage.doCallBack = doCallBack
+	manage.destroyCallBack = destroyCallBack
+	manage.Ctx = context.Background()
 	// 扩展功能
 	amInfo := new(AMInfo)
 	amInfo.Version = VERSION
@@ -120,18 +122,18 @@ func NewAppManage(appCode string, port int, mApi RegisterManageApi, pApi Registe
 		}
 	}
 	amInfo.AppDir = tools.GetAppPath()
-	manager.ManageInfo = amInfo
+	manage.ManageInfo = amInfo
 	cachedCfg := config.NewConfigDefault()
 	cachedCfg.DataDir = filepath.Join(amInfo.SysDir, appCode, "cached")
 	ledisDb, err := ledis.Open(cachedCfg)
 	if err != nil {
 		return nil, fmt.Errorf("创建缓存失败:%s", err.Error())
 	}
-	manager.AppCached, err = ledisDb.Select(0)
+	manage.AppCached, err = ledisDb.Select(0)
 	if err != nil {
 		return nil, fmt.Errorf("初始化缓存失败:%s", err.Error())
 	}
-	return manager, nil
+	return manage, nil
 }
 
 type RegisterManageApi func(engRouter *gin.RouterGroup)
@@ -155,7 +157,14 @@ type AMInfo struct {
 }
 
 type AppManage struct {
-	AppCode           string
+	// public field
+	AppCode    string
+	ManageInfo *AMInfo
+	AppCached  *ledis.DB
+	SuperAuth  map[string]string
+	Debug      bool
+	Ctx        context.Context
+	// privacy field
 	firstRun          bool
 	procStore         cmap.ConcurrentMap[string, *Proc]
 	extProcStore      cmap.ConcurrentMap[string, *ExtProc]
@@ -167,10 +176,6 @@ type AppManage struct {
 	initCallBack      AppInitCallBack
 	doCallBack        AppDoCallBack
 	destroyCallBack   AppDestroyCallBack
-	ManageInfo        *AMInfo
-	AppCached         *ledis.DB
-	SuperAuth         map[string]string
-	Debug             bool
 }
 
 // RegisterProc 注册内部服务
