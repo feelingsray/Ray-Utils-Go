@@ -1,6 +1,6 @@
 module github.com/feelingsray/ray-utils-go/v2
 
-go 1.22
+go 1.23
 
 require (
 	github.com/gin-contrib/pprof v1.4.0

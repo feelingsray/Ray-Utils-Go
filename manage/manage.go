@@ -1,7 +1,6 @@
 package manage
 
 import (
-	"bytes"
 	"context"
 	"crypto/tls"
 	"embed"
@@ -11,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -40,13 +38,13 @@ var SuperAuth = map[string]string{
 	"ray":       "TCnlp6dW@TCdAE",
 	"r89a0y2p":  "A&N136Fl#eU@yb",
 	"sad78d0as": "B30tBKb#D@47wh",
-	"i7wituzy":  "WrKE@lRAfh4Ucj", // 矿用设备监察(赵鹰)
-	"#b6z419z":  "GEfv@kOxTBqxq@", // 融合平台,煤矿大脑APP,一朵云(主) (李超伟)
-	"v#4xko97":  "#VYjAPNT@@ehl#", // 事故风险分析平台,小英秘书APP,一朵云(备) (李晓芳)
-	"gelj5ov8":  "8RX@PCDcKFZ@#V", // 安责险 (李锦涛),应急BU,探放水
-	"dkz5xqxb":  "teAM4@0h@Ib0D8", // 运营平台,运维平台
-	"hgqs5j02":  "@DF1AL7tYWhf6i", // 大厂的第三方平台
-	"fwoeu9tp":  "lD#APTP#72e4#7", // 小厂的第三方平台
+	"i7wituzy":  "WrKE@lRAfh4Ucj",
+	"#b6z419z":  "GEfv@kOxTBqxq@",
+	"v#4xko97":  "#VYjAPNT@@ehl#",
+	"gelj5ov8":  "8RX@PCDcKFZ@#V",
+	"dkz5xqxb":  "teAM4@0h@Ib0D8",
+	"hgqs5j02":  "@DF1AL7tYWhf6i",
+	"fwoeu9tp":  "lD#APTP#72e4#7",
 }
 
 var VERSION = "2.0.0"
@@ -68,19 +66,6 @@ type Proc struct {
 	HeartTime int64
 }
 
-type ExtProc struct {
-	Code      string
-	Name      string
-	Status    ProcStat
-	StartTime int64
-	CheckTime int64
-	Cmd       string
-	PID       string
-	Always    bool
-	Sudo      bool
-	Err       error
-}
-
 // NewAppManage 初始化一个管理对象
 func NewAppManage(appCode string, port int, mApi RegisterManageApi, pApi RegisterProxyApi, feApi RegisterFeApi, initCallBack AppInitCallBack,
 	doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack, sysDir string, debug bool,
@@ -95,7 +80,6 @@ func NewAppManage(appCode string, port int, mApi RegisterManageApi, pApi Registe
 	}
 	manage.port = port
 	manage.procStore = cmap.New[*Proc]()
-	manage.extProcStore = cmap.New[*ExtProc]()
 	if debug {
 		gin.SetMode(gin.DebugMode)
 	} else {
@@ -153,7 +137,7 @@ type AMInfo struct {
 	AppDir    string
 	Version   string
 	CopyRight string
-	Author    string
+	Author    []string
 }
 
 type AppManage struct {
@@ -167,7 +151,6 @@ type AppManage struct {
 	// privacy field
 	firstRun          bool
 	procStore         cmap.ConcurrentMap[string, *Proc]
-	extProcStore      cmap.ConcurrentMap[string, *ExtProc]
 	engRouter         *gin.Engine
 	port              int
 	registerManageApi RegisterManageApi
@@ -196,14 +179,6 @@ func (p *AppManage) ClearAllProc() {
 	p.procStore.Clear()
 }
 
-// DeleteProc 删除内部服务
-func (p *AppManage) DeleteProc(code string) {
-	_, exist := p.procStore.Get(code)
-	if exist {
-		p.procStore.Remove(code)
-	}
-}
-
 // SetProcStatus 设置内部服务状态
 func (p *AppManage) SetProcStatus(code string, status ProcStat) {
 	old, exist := p.procStore.Get(code)
@@ -229,25 +204,6 @@ func (p *AppManage) SetProcHeartTime(code string) {
 	}
 }
 
-// GetProcStatusByCode 通过编码获取内部服务状态
-func (p *AppManage) GetProcStatusByCode(code string) ProcStat {
-	old, exist := p.procStore.Get(code)
-	if !exist {
-		return ProcUnknown
-	} else {
-		return old.Status
-	}
-}
-
-// GetProcStatus 获取所有内部服务状态
-func (p *AppManage) GetProcStatus() map[string]*Proc {
-	serviceList := make(map[string]*Proc)
-	for key, value := range p.procStore.Items() {
-		serviceList[key] = value
-	}
-	return serviceList
-}
-
 // ProcInitForAll 手动初始化资源
 func (p *AppManage) ProcInitForAll() error {
 	return p.initCallBack(p)
@@ -256,42 +212,6 @@ func (p *AppManage) ProcInitForAll() error {
 // ProcDestroyForAll 手动销毁资源
 func (p *AppManage) ProcDestroyForAll() error {
 	return p.destroyCallBack(p)
-}
-
-// RestartProcByCode 根据编码重启内部服务,单个启动服务,需要手动控制初始化资源和销毁资源
-func (p *AppManage) RestartProcByCode(code string) (*Proc, error) {
-	oldProc, exist := p.procStore.Get(code)
-	if !exist {
-		return nil, errors.New("此内部服务未注册:" + code)
-	} else {
-		proc := oldProc
-		if proc.Status != ProcClosed {
-			proc.Status = ProcStop
-			p.procStore.Set(code, proc)
-		}
-	}
-	time.Sleep(100 * time.Millisecond)
-	for {
-		proc, exist := p.procStore.Get(code)
-		if exist && proc.Status == ProcClosed {
-			p.doCallBack(code, p)
-			break
-		}
-	}
-	newProc, _ := p.procStore.Get(code)
-	return newProc, nil
-}
-
-// StopProcByCode 根据编码停止内部服务
-func (p *AppManage) StopProcByCode(code string) {
-	proc, exist := p.procStore.Get(code)
-	if exist {
-		stopProc := proc
-		if stopProc.Status == ProcRun {
-			stopProc.Status = ProcStop
-			p.procStore.Set(code, stopProc)
-		}
-	}
 }
 
 // RestartProcAfterInit 初始化后重启所有服务
@@ -348,182 +268,7 @@ func (p *AppManage) RestartProcAfterInit() error {
 	return nil
 }
 
-/**************************   外部服务  ********************************************/
-
-// RegisterExtProc 注册外部服务
-func (p *AppManage) RegisterExtProc(code, name, cmd string, always, sudo bool) error {
-	proc := new(ExtProc)
-	proc.Code = code
-	proc.Name = name
-	proc.Status = ProcClosed
-	proc.Cmd = cmd
-	proc.Always = always
-	proc.Sudo = sudo
-	_, exist := p.extProcStore.Get(code)
-	if !exist {
-		p.extProcStore.Set(code, proc)
-	}
-	return nil
-}
-
-// SetExtProcStatus 设置外部服务状态
-func (p *AppManage) SetExtProcStatus(code string, status ProcStat) error {
-	old, exist := p.extProcStore.Get(code)
-	if !exist {
-		return fmt.Errorf("未注册的外部服务:%s", code)
-	} else {
-		proc := old
-		proc.Status = status
-		proc.StartTime = time.Now().Unix()
-		p.extProcStore.Set(code, proc)
-		return nil
-	}
-}
-
-// CheckExtProcByCode 检查外部服务byCode
-func (p *AppManage) CheckExtProcByCode(code string) error {
-	procObj, exist := p.extProcStore.Get(code)
-	if !exist {
-		return fmt.Errorf("未注册的外部服务:%s", code)
-	}
-	proc := procObj
-	cmd := exec.Command("bash", "-c", fmt.Sprintf("ps -ef|grep '%s'|grep -v grep|awk '{print $2}' ", proc.Cmd))
-	pidByte, err := cmd.Output()
-	if err != nil {
-		return err
-	}
-	pid := string(pidByte)
-	pid = strings.Replace(pid, "\n", "", -1)
-	pid = strings.Replace(pid, "\r", "", -1)
-	pid = strings.Replace(pid, "\t", "", -1)
-	if pid != "" {
-		proc.Status = ProcRun
-		proc.PID = pid
-		proc.CheckTime = time.Now().Unix()
-	} else {
-		proc.Status = ProcClosed
-		proc.PID = ""
-		proc.CheckTime = time.Now().Unix()
-	}
-	if proc.StartTime == 0 {
-		proc.StartTime = time.Now().Unix()
-	}
-	p.extProcStore.Set(code, proc)
-	return nil
-}
-
-// StartExtProcByCode 启动外部服务
-func (p *AppManage) StartExtProcByCode(code string) error {
-	procObj, exist := p.extProcStore.Get(code)
-	if !exist {
-		return fmt.Errorf("未注册的外部服务:%s", code)
-	}
-	proc := procObj
-	cmdStr := proc.Cmd
-	if proc.Sudo {
-		cmdStr = fmt.Sprintf("sudo %s", cmdStr)
-	}
-	args := strings.Split(cmdStr, " ")
-	cmd := exec.Command(args[0], args[1:]...)
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-	if err != nil && err.Error() != "exit status 100" {
-		proc.Err = err
-		p.extProcStore.Set(code, proc)
-		return err
-	}
-	err = p.CheckExtProcByCode(code)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// StopExtProcByCode 根据外部服务编码停止服务
-func (p *AppManage) StopExtProcByCode(code string) error {
-	procObj, exist := p.extProcStore.Get(code)
-	if !exist {
-		return fmt.Errorf("未注册的外部服务:%s", code)
-	}
-	proc := procObj
-	if proc.PID != "" && proc.Status == ProcRun {
-		cmdStr := fmt.Sprintf("sudo kill -9 %s", proc.PID)
-		args := strings.Split(cmdStr, " ")
-		cmd := exec.Command(args[0], args[1:]...)
-		var stdout bytes.Buffer
-		var stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-		err := cmd.Run()
-		if err != nil && err.Error() != "exit status 100" {
-			proc.Err = err
-			p.extProcStore.Set(code, proc)
-			return err
-		}
-		err = p.CheckExtProcByCode(code)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-	return nil
-}
-
-// ExtProcManage 外部服务管理(检查->重启->检查)
-func (p *AppManage) ExtProcManage() {
-	for key, value := range p.extProcStore.Items() {
-		code := key
-		proc := value
-		// 检查进程是否存在
-		_ = p.CheckExtProcByCode(code)
-		// 重启尝试
-		if proc.Always && proc.Status == ProcClosed {
-			_ = p.StartExtProcByCode(code)
-			time.Sleep(1 * time.Second)
-			_ = p.CheckExtProcByCode(code)
-		}
-	}
-}
-
 /*****************主服务********************/
-
-// 内部服务
-func (p *AppManage) restartProcApi(c *gin.Context) {
-	code := c.Query("code")
-	if code == "" {
-		// 全部重启
-		err := p.RestartProcAfterInit()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
-			return
-		}
-		c.JSON(http.StatusOK, "发送全部服务重启指令......")
-		return
-	} else {
-		proc, err := p.RestartProcByCode(code)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
-			return
-		}
-		c.JSON(http.StatusOK, proc)
-		return
-	}
-}
-
-func (p *AppManage) stopProcApi(c *gin.Context) {
-	code := c.Query("code")
-	if code == "" {
-		c.JSON(http.StatusInternalServerError, "服务编码不能为空")
-		return
-	} else {
-		p.StopProcByCode(code)
-		c.JSON(http.StatusOK, fmt.Sprintf("发送停止指令:%s", code))
-		return
-	}
-}
 
 func (p *AppManage) getProcListApi(c *gin.Context) {
 	data := make(map[string]any)
@@ -534,38 +279,6 @@ func (p *AppManage) getProcListApi(c *gin.Context) {
 	data["proc_list"] = serviceList
 	data["proc_count"] = runtime.NumGoroutine()
 	c.JSON(http.StatusOK, data)
-	return
-}
-
-func (p *AppManage) addProcApi(c *gin.Context) {
-	code := c.Query("code")
-	name := c.Query("name")
-	if code == "" || name == "" {
-		c.JSON(http.StatusInternalServerError, "code和name不能为空")
-		return
-	}
-	p.RegisterProc(code, name)
-	c.JSON(http.StatusOK, "注册服务成功")
-	return
-}
-
-func (p *AppManage) deleteProcApi(c *gin.Context) {
-	// 先停止这个服务的协程
-	p.stopProcApi(c)
-	// 然后从服务列表中删除这个服务
-	code := c.Query("code")
-	p.DeleteProc(code)
-	c.JSON(http.StatusOK, "删除服务成功")
-	return
-}
-
-// 外部服务
-func (p *AppManage) getExtProcListApi(c *gin.Context) {
-	serviceList := make(map[string]*ExtProc)
-	for key, value := range p.extProcStore.Items() {
-		serviceList[key] = value
-	}
-	c.JSON(http.StatusOK, serviceList)
 	return
 }
 
@@ -698,35 +411,6 @@ func (p *AppManage) basicAuth(username, pwd string, dt int64, mySecret []string)
 		}
 	}
 	return false, errors.New("用户非OTP用户或Super用户"), ""
-}
-
-/********************** 扩展方法 ****************/
-
-// SetCached 设置缓存信息
-func (p *AppManage) SetCached(key, field, value string) (int64, error) {
-	return p.AppCached.HSet([]byte(key), []byte(field), []byte(value))
-}
-
-// GetCachedAll 获取所有Filed值
-func (p *AppManage) GetCachedAll(key string) (map[string]string, error) {
-	fv, err := p.AppCached.HGetAll([]byte(key))
-	if err != nil {
-		return nil, err
-	}
-	data := make(map[string]string)
-	for _, v := range fv {
-		data[string(v.Field)] = string(v.Value)
-	}
-	return data, nil
-}
-
-// GetCached 获取缓存信息
-func (p *AppManage) GetCached(key, field string) (string, error) {
-	dataByte, err := p.AppCached.HGet([]byte(key), []byte(field))
-	if err != nil {
-		return "", err
-	}
-	return string(dataByte), nil
 }
 
 type ProcessResources struct {
@@ -948,14 +632,7 @@ func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, http
 	mapi.POST("/login", p.login)
 	// 登录加密
 	mapi.Use(p.httpBasicAuth(p.basicAuth))
-	// 注册内部服务API
-	mapi.GET("/proc/add", p.addProcApi)
-	mapi.GET("/proc/delete", p.deleteProcApi)
-	mapi.GET("/proc/restart", p.restartProcApi)
-	mapi.GET("/proc/stop", p.stopProcApi)
 	mapi.GET("/proc/list", p.getProcListApi)
-	// 注册外部服务API
-	mapi.GET("/extProc/list", p.getExtProcListApi)
 	// 注入外部ManageAPI接口
 	p.registerManageApi(mapi)
 	// 注入外部FeAPI接口
