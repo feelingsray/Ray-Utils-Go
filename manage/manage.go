@@ -52,10 +52,9 @@ var VERSION = "2.0.0"
 type ProcStat string
 
 var (
-	ProcRun     ProcStat = "run"
-	ProcStop    ProcStat = "stop"
-	ProcClosed  ProcStat = "closed"
-	ProcUnknown ProcStat = ""
+	ProcRun    ProcStat = "run"
+	ProcStop   ProcStat = "stop"
+	ProcClosed ProcStat = "closed"
 )
 
 type Proc struct {
@@ -67,7 +66,7 @@ type Proc struct {
 }
 
 // NewAppManage 初始化一个管理对象
-func NewAppManage(appCode string, port int, mApi RegisterManageApi, pApi RegisterProxyApi, feApi RegisterFeApi, initCallBack AppInitCallBack,
+func NewAppManage(ctx context.Context, appCode string, port int, mApi RegisterManageApi, pApi RegisterProxyApi, feApi RegisterFeApi, initCallBack AppInitCallBack,
 	doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack, sysDir string, debug bool,
 ) (*AppManage, error) {
 	manage := new(AppManage)
@@ -92,7 +91,7 @@ func NewAppManage(appCode string, port int, mApi RegisterManageApi, pApi Registe
 	manage.initCallBack = initCallBack
 	manage.doCallBack = doCallBack
 	manage.destroyCallBack = destroyCallBack
-	manage.Ctx = context.Background()
+	manage.Ctx = ctx
 	// 扩展功能
 	amInfo := new(AMInfo)
 	amInfo.Version = VERSION
