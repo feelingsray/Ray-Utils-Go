@@ -33,13 +33,12 @@ func CreateDir(dir string) error {
 	}
 	if isExist {
 		return nil
+	}
+	err = os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		return err
 	} else {
-		err = os.MkdirAll(dir, os.ModePerm)
-		if err != nil {
-			return err
-		} else {
-			return nil
-		}
+		return nil
 	}
 }
 

@@ -12,9 +12,9 @@ func TestIntegral(t *testing.T) {
 		return
 	}
 	static := &TagStatic{
-		"tag01", "float", "-9999", "1",
-		-9999, -9999, 40, 30,
-		70, -9999, -9999, -9999,
+		TagCode: "tag01", DataType: "float", WVal: "-9999", AVal: "1",
+		WHI: -9999, WLOW: -9999, AHI: 40, ALOW: 30,
+		PHI: 70, PLOW: -9999, RHI: -9999, RLOW: -9999,
 	}
 	baseTimestamp := int64(1683877950)
 	valueList := []float64{0, 15, 30, 45, 60, 75, 90, 115, 110, 101, 100, 85, 75, 65, 55, 10}

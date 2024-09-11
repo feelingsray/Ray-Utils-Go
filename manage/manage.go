@@ -141,14 +141,17 @@ type AMInfo struct {
 
 type AppManage struct {
 	// public field
-	AppCode    string
+	AppCode string
+
 	ManageInfo *AMInfo
 	AppCached  *ledis.DB
 	SuperAuth  map[string]string
 	Debug      bool
 	Ctx        context.Context
+
 	// privacy field
-	firstRun          bool
+	firstRun bool
+
 	procStore         cmap.ConcurrentMap[string, *Proc]
 	engRouter         *gin.Engine
 	port              int
@@ -183,12 +186,11 @@ func (p *AppManage) SetProcStatus(code string, status ProcStat) {
 	old, exist := p.procStore.Get(code)
 	if !exist {
 		return
-	} else {
-		proc := old
-		proc.Status = status
-		if status == ProcRun {
-			proc.StartTime = time.Now().Unix()
-		}
+	}
+	proc := old
+	proc.Status = status
+	if status == ProcRun {
+		proc.StartTime = time.Now().Unix()
 	}
 }
 
@@ -197,10 +199,9 @@ func (p *AppManage) SetProcHeartTime(code string) {
 	old, exist := p.procStore.Get(code)
 	if !exist {
 		return
-	} else {
-		proc := old
-		proc.HeartTime = time.Now().Unix()
 	}
+	proc := old
+	proc.HeartTime = time.Now().Unix()
 }
 
 // ProcInitForAll 手动初始化资源
@@ -295,7 +296,7 @@ func (p *AppManage) login(c *gin.Context) {
 	password, pwd := req["password"]
 	timestamp, dt := req["timestamp"]
 	mySecret, myS := req["secret"]
-	if (un == false) || (pwd == false) || (dt == false) {
+	if (!un) || (!pwd) || (!dt) {
 		resp["code"] = http.StatusInternalServerError
 		resp["msg"] = "用户名、密码或客户端时间未传值"
 		c.JSON(http.StatusInternalServerError, resp)
@@ -405,9 +406,8 @@ func (p *AppManage) basicAuth(username, pwd string, dt int64, mySecret []string)
 		ok, key := rotp.RTOTPVerifyWithTime(pwd, time.Unix(dt, 0), mySecret)
 		if ok {
 			return true, nil, key
-		} else {
-			return false, errors.New("动态OTP密码错误"), key
 		}
+		return false, errors.New("动态OTP密码错误"), key
 	}
 	return false, errors.New("用户非OTP用户或Super用户"), ""
 }
@@ -437,7 +437,7 @@ func (p *AppManage) GetPSInfo(processTop int) map[string]any {
 	psInfo["cpu"] = 0
 	cpuPercent, err := cpu.Percent(time.Second, false)
 	if err == nil {
-		if cpuPercent != nil && len(cpuPercent) > 0 {
+		if len(cpuPercent) > 0 {
 			psInfo["cpu"] = cpuPercent[0]
 		}
 	}
@@ -446,7 +446,7 @@ func (p *AppManage) GetPSInfo(processTop int) map[string]any {
 	psInfo["cpu_core"] = 0
 	psInfo["cpu_type"] = ""
 	if err == nil {
-		if cpuInfo != nil && len(cpuInfo) > 0 {
+		if len(cpuInfo) > 0 {
 			cpuCore := int64(0)
 			for i := 0; i < len(cpuInfo); i++ {
 				cpuCore += int64(cpuInfo[i].Cores)
@@ -463,7 +463,7 @@ func (p *AppManage) GetPSInfo(processTop int) map[string]any {
 	// 获取磁盘使用率
 	psInfo["disk"] = 0
 	parts, _ := disk.Partitions(true)
-	if parts != nil && len(parts) > 0 {
+	if len(parts) > 0 {
 		diskU, err := disk.Usage(parts[0].Mountpoint)
 		if diskU != nil && err == nil {
 			psInfo["disk"] = diskU.UsedPercent
@@ -583,7 +583,6 @@ func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, http
 		} else {
 			p.engRouter.StaticFS("/"+loc, http.FS(fs))
 		}
-
 	}
 	// 源数据文件下载路径
 	rawPath := "/jyaiot/raw"

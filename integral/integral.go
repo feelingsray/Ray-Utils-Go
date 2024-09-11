@@ -26,7 +26,8 @@ type Integral struct {
 
 type (
 	dealRealAlarmItem func(alarmItem *AlarmItem) error
-	dealHisAlarmItem  func(alarmItem *AlarmItem) error
+
+	dealHisAlarmItem func(alarmItem *AlarmItem) error
 )
 
 func (integral *Integral) Init(host string, port int, password string, dbNum int, realFunc dealRealAlarmItem, hisFunc dealHisAlarmItem) error {
@@ -320,31 +321,30 @@ func (integral *Integral) dealAlarmTag(tagCode string, alarmType string,
 			return nil, err
 		}
 		return newAlarmItem, nil
-	} else {
-		if alarmItem.LastTagTime > newTag.Timestamp {
+	}
+	if alarmItem.LastTagTime > newTag.Timestamp {
+		return nil, nil
+	}
+	alarmItem.DuringType = "during"
+	if alarmItem.DataType == "float" {
+		newValue, err := cast.ToFloat64E(newTag.Value)
+		if err != nil {
 			return nil, nil
 		}
-		alarmItem.DuringType = "during"
-		if alarmItem.DataType == "float" {
-			newValue, err := cast.ToFloat64E(newTag.Value)
-			if err != nil {
-				return nil, nil
-			}
-			alarmItem.Integral += (newValue + alarmItem.LastTagValue) * float64(newTag.Timestamp-alarmItem.LastTagTime) / 2
-			alarmItem.LastTagValue = newValue
-			if newValue > alarmItem.MaxValue {
-				alarmItem.MaxValue = newValue
-				alarmItem.MaxTime = newTag.Timestamp
-			}
-			if newValue < alarmItem.MinValue {
-				alarmItem.MinValue = newValue
-				alarmItem.MinTime = newTag.Timestamp
-			}
+		alarmItem.Integral += (newValue + alarmItem.LastTagValue) * float64(newTag.Timestamp-alarmItem.LastTagTime) / 2
+		alarmItem.LastTagValue = newValue
+		if newValue > alarmItem.MaxValue {
+			alarmItem.MaxValue = newValue
+			alarmItem.MaxTime = newTag.Timestamp
 		}
-		alarmItem.LastTagTime = newTag.Timestamp
-		_ = integral.setAlarmItem(tagCode, alarmType, alarmItem)
-		return alarmItem, nil
+		if newValue < alarmItem.MinValue {
+			alarmItem.MinValue = newValue
+			alarmItem.MinTime = newTag.Timestamp
+		}
 	}
+	alarmItem.LastTagTime = newTag.Timestamp
+	_ = integral.setAlarmItem(tagCode, alarmType, alarmItem)
+	return alarmItem, nil
 }
 
 func (integral *Integral) dealNormalTag(tagCode string, alarmType string,
@@ -401,14 +401,13 @@ func (integral *Integral) getAlarmItem(tagCode string, alarmType string) (*Alarm
 	}
 	if len(alarmString) == 0 {
 		return nil, nil
-	} else {
-		alarmItem := AlarmItem{}
-		err = serialize.LoadJson([]byte(alarmString), &alarmItem)
-		if err != nil {
-			return nil, fmt.Errorf("json load err: %s", err.Error())
-		}
-		return &alarmItem, nil
 	}
+	alarmItem := AlarmItem{}
+	err = serialize.LoadJson([]byte(alarmString), &alarmItem)
+	if err != nil {
+		return nil, fmt.Errorf("json load err: %s", err.Error())
+	}
+	return &alarmItem, nil
 }
 
 func (integral *Integral) deleteAlarmItem(tagCode string, alarmType string) error {

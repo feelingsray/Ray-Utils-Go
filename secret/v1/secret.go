@@ -53,16 +53,14 @@ func (s *SecretCrypt) Decrypt(raw string) (string, error) {
 	data, err := s.Crypt.Decrypt(raw, s.PrivateKey)
 	if err != nil {
 		return "", err
-	} else {
-		return data, nil
 	}
+	return data, nil
 }
 
 func (s *SecretCrypt) Encrypt(raw string) (string, error) {
 	data, err := s.Crypt.Encrypt(raw, s.PublicKey)
 	if err != nil {
 		return "", err
-	} else {
-		return data, nil
 	}
+	return data, nil
 }

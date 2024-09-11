@@ -4,18 +4,21 @@ type AlarmItem struct {
 	TagCode string
 
 	// [dis,wval,aval,whi,wlow,ahi,alow,phi,plow,rhi,rlow]
-	AlarmType  string // 报警类型
+	AlarmType string // 报警类型
+
 	DataType   string // 数据类型
 	DuringType string // 报警持续类型[start, during, end]
 	Threshold  any    // 报警线：开关量报警值/模拟量阈值/其他报警指标
 
 	// 所有iot报警都有的属性
-	StartVal    any   // 报警开始值
+	StartVal any // 报警开始值
+
 	StartTime   int64 // 报警开始时间
 	LastTagTime int64 // 上一个报警点时间
 
 	// 下面六个属性，只有积分报警用到
-	Integral     float64 // 当前积分总量
+	Integral float64 // 当前积分总量
+
 	LastTagValue float64 // 最后一个点的取值
 	MaxValue     float64 // 最大值
 	MinValue     float64 // 最小值

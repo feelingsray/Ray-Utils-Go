@@ -59,21 +59,21 @@ func TestGeneralFile(t *testing.T) {
 	t.Log(string(pubByte))
 }
 
-//-----BEGIN PRIVATE KEY-----
-//MIGTAgEAMBMGByqGSM49AgEGCCqBHM9VAYItBHkwdwIBAQQgfUKyp1fzOhixB2OP
-//kmyynzBbM1byYMJJQL76N/BVg+CgCgYIKoEcz1UBgi2hRANCAAQeounVibe0P2iE
-//0wUmbUmjy+uMMavtrm3cOKO+SDgli+PXUuEpakwvsKv5VcRlRPPHm7GtLuGNDmXH
-//K5r3lIZz
-//-----END PRIVATE KEY-----
+// -----BEGIN PRIVATE KEY-----
+// MIGTAgEAMBMGByqGSM49AgEGCCqBHM9VAYItBHkwdwIBAQQgfUKyp1fzOhixB2OP
+// kmyynzBbM1byYMJJQL76N/BVg+CgCgYIKoEcz1UBgi2hRANCAAQeounVibe0P2iE
+// 0wUmbUmjy+uMMavtrm3cOKO+SDgli+PXUuEpakwvsKv5VcRlRPPHm7GtLuGNDmXH
+// K5r3lIZz
+// -----END PRIVATE KEY-----
 //
-//-----BEGIN PUBLIC KEY-----
-//MFkwEwYHKoZIzj0CAQYIKoEcz1UBgi0DQgAEHqLp1Ym3tD9ohNMFJm1Jo8vrjDGr
-//7a5t3Dijvkg4JYvj11LhKWpML7Cr+VXEZUTzx5uxrS7hjQ5lxyua95SGcw==
-//-----END PUBLIC KEY-----
+// -----BEGIN PUBLIC KEY-----
+// MFkwEwYHKoZIzj0CAQYIKoEcz1UBgi0DQgAEHqLp1Ym3tD9ohNMFJm1Jo8vrjDGr
+// 7a5t3Dijvkg4JYvj11LhKWpML7Cr+VXEZUTzx5uxrS7hjQ5lxyua95SGcw==
+// -----END PUBLIC KEY-----
 //
 
-//=== RUN   TestNewSecretCrypt
-//--- PASS: TestNewSecretCrypt (7.97s)
-//PASS
-//=== RUN   TestNewSecretCrypt
-//--- PASS: TestNewSecretCrypt (187.6s)
+// === RUN   TestNewSecretCrypt
+// --- PASS: TestNewSecretCrypt (7.97s)
+// PASS
+// === RUN   TestNewSecretCrypt
+// --- PASS: TestNewSecretCrypt (187.6s)

@@ -26,9 +26,8 @@ func (s *SM2Crypt) ReadPrivateKeyFromMem(key string) (*sm2.PrivateKey, error) {
 	privateKey, err := sm2.ReadPrivateKeyFromMem([]byte(key), s.pwd)
 	if err != nil {
 		return nil, err
-	} else {
-		return privateKey, nil
 	}
+	return privateKey, nil
 }
 
 func (s *SM2Crypt) ReadPublicKeyFromMem(key string) (*sm2.PublicKey, error) {
@@ -38,18 +37,16 @@ func (s *SM2Crypt) ReadPublicKeyFromMem(key string) (*sm2.PublicKey, error) {
 	publicKey, err := sm2.ReadPublicKeyFromMem([]byte(key), s.pwd)
 	if err != nil {
 		return nil, err
-	} else {
-		return publicKey, nil
 	}
+	return publicKey, nil
 }
 
 func (s *SM2Crypt) Encrypt(data string, publicKey *sm2.PublicKey) (string, error) {
 	encryptData, err := publicKey.Encrypt([]byte(data))
 	if err != nil {
 		return "", err
-	} else {
-		return hex.EncodeToString(encryptData), nil
 	}
+	return hex.EncodeToString(encryptData), nil
 }
 
 func (s *SM2Crypt) Decrypt(data string, privateKey *sm2.PrivateKey) (string, error) {
@@ -60,7 +57,6 @@ func (s *SM2Crypt) Decrypt(data string, privateKey *sm2.PrivateKey) (string, err
 	decryptData, err := privateKey.Decrypt(tmp)
 	if err != nil {
 		return "", err
-	} else {
-		return string(decryptData), nil
 	}
+	return string(decryptData), nil
 }

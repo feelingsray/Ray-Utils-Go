@@ -38,16 +38,14 @@ func (s *SM2Crypt) decrypt(raw string) (string, error) {
 	data, err := s.Crypt.Decrypt(raw, s.PrivateKey)
 	if err != nil {
 		return "", err
-	} else {
-		return data, nil
 	}
+	return data, nil
 }
 
 func (s *SM2Crypt) encrypt(raw string) (string, error) {
 	data, err := s.Crypt.Encrypt(raw, s.PublicKey)
 	if err != nil {
 		return "", err
-	} else {
-		return data, nil
 	}
+	return data, nil
 }

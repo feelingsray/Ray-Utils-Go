@@ -1,7 +1,7 @@
 tidy:
 	go mod tidy
 
-install-gofumpt:
-	go install mvdan.cc/gofumpt@latest
+install-fmt:
+	go install github.com/fsgo/go_fmt/cmd/gorgeous@latest
 fmt:
-	gofumpt -l -w .
+	gorgeous ./...

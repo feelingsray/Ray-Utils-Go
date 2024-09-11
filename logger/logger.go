@@ -25,7 +25,7 @@ func ConsoleHandle(level logrus.Level) *logrus.Logger {
 	return logger
 }
 
-func MultiFileHandle(dir, name string, level logrus.Level) (*logrus.Logger, error) {
+func MultiFileHandle(dir, name string, level logrus.Level, hour int) (*logrus.Logger, error) {
 	isExist, err := tools.PathExists(dir)
 	if err != nil {
 		return nil, err
@@ -38,7 +38,7 @@ func MultiFileHandle(dir, name string, level logrus.Level) (*logrus.Logger, erro
 	path := filepath.Join(dir, name)
 	logs, _ := rotatelogs.New(fmt.Sprintf("%s%s", path, ".%Y%m%d%H"),
 		rotatelogs.WithLinkName(path),
-		rotatelogs.WithMaxAge(12*time.Hour),
+		rotatelogs.WithMaxAge(time.Duration(hour)*time.Hour),
 		rotatelogs.WithRotationTime(time.Hour),
 	)
 	logger := logrus.New()
