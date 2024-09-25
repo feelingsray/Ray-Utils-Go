@@ -18,6 +18,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-contrib/expvar"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/ivanlebron/ledisdb/config"
@@ -565,6 +566,7 @@ func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, http
 	p.engRouter.Use(middleware...)
 	if p.Debug {
 		pprof.Register(p.engRouter)
+		p.engRouter.GET("/debug/vars", expvar.Handler())
 	}
 	for loc, fs := range fss {
 		_, err := fs.ReadFile("index.html")

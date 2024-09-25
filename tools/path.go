@@ -37,9 +37,8 @@ func CreateDir(dir string) error {
 	err = os.MkdirAll(dir, os.ModePerm)
 	if err != nil {
 		return err
-	} else {
-		return nil
 	}
+	return nil
 }
 
 func CopyFile(dstName string, srcName string) error {
