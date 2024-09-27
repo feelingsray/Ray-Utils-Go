@@ -366,13 +366,13 @@ func (p *AppManage) httpBasicAuth(authFunc func(user, password string, dt int64,
 		auth := c.GetHeader("Authorization")
 		if auth == "" {
 			c.Header("WWW-Authenticate", realm)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, "HTTP Error 401:Unauthorized")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"reason": "no auth"})
 			return
 		}
 		authStr, err := base64.StdEncoding.DecodeString(strings.SplitN(auth, " ", 2)[1])
 		if err != nil {
 			c.Header("WWW-Authenticate", realm)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, "HTTP Error 401:Unauthorized")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"reason": "no auth"})
 			return
 		}
 		user := strings.SplitN(string(authStr), ":", 2)[0]
@@ -380,7 +380,7 @@ func (p *AppManage) httpBasicAuth(authFunc func(user, password string, dt int64,
 		ok, err, key := authFunc(user, pwd, 0, nil)
 		if err != nil {
 			c.Header("WWW-Authenticate", realm)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, "HTTP Error 401:Unauthorized")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"reason": "no auth"})
 			return
 		}
 		if ok {
@@ -389,7 +389,7 @@ func (p *AppManage) httpBasicAuth(authFunc func(user, password string, dt int64,
 			c.Next()
 		} else {
 			c.Header("WWW-Authenticate", realm)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, "HTTP Error 401:Unauthorized")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"http": "401 no auth"})
 			return
 		}
 	}
