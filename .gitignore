@@ -21,3 +21,5 @@ vendor/*
 autoUpdate/client/release/demo/release_1.0.0/install.sh
 
 vendor
+
+go.work*

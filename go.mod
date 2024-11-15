@@ -6,7 +6,7 @@ require (
 	github.com/gin-contrib/expvar v1.0.1
 	github.com/gin-contrib/pprof v1.4.0
 	github.com/gin-gonic/gin v1.9.1
-	github.com/goccy/go-json v0.10.2
+	github.com/goccy/go-json v0.10.3
 	github.com/ivanlebron/gmsm v1.0.0
 	github.com/ivanlebron/ledisdb v1.0.0
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
@@ -74,7 +74,7 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	golang.org/x/arch v0.7.0 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
-	golang.org/x/net v0.22.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect

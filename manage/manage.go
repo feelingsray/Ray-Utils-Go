@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/rand/v2"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -35,19 +36,6 @@ import (
 	"github.com/feelingsray/ray-utils-go/v2/tools"
 )
 
-var SuperAuth = map[string]string{
-	"ray":       "TCnlp6dW@TCdAE",
-	"r89a0y2p":  "A&N136Fl#eU@yb",
-	"sad78d0as": "B30tBKb#D@47wh",
-	"i7wituzy":  "WrKE@lRAfh4Ucj",
-	"#b6z419z":  "GEfv@kOxTBqxq@",
-	"v#4xko97":  "#VYjAPNT@@ehl#",
-	"gelj5ov8":  "8RX@PCDcKFZ@#V",
-	"dkz5xqxb":  "teAM4@0h@Ib0D8",
-	"hgqs5j02":  "@DF1AL7tYWhf6i",
-	"fwoeu9tp":  "lD#APTP#72e4#7",
-}
-
 var VERSION = "2.0.0"
 
 type ProcStat string
@@ -68,10 +56,10 @@ type Proc struct {
 
 // NewAppManage 初始化一个管理对象
 func NewAppManage(ctx context.Context, appCode string, port int, mApi RegisterManageApi, pApi RegisterProxyApi, feApi RegisterFeApi, initCallBack AppInitCallBack,
-	doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack, sysDir string, debug bool,
+	doCallBack AppDoCallBack, destroyCallBack AppDestroyCallBack, sysDir string, debug bool, superAuth map[string]string,
 ) (*AppManage, error) {
 	manage := new(AppManage)
-	manage.SuperAuth = SuperAuth
+	manage.SuperAuth = superAuth
 	manage.firstRun = true
 	manage.AppCode = appCode
 	manage.Debug = debug
@@ -151,8 +139,8 @@ type AppManage struct {
 	Ctx        context.Context
 
 	// privacy field
-	firstRun bool
-
+	firstRun          bool
+	whitelist         map[string]bool
 	procStore         cmap.ConcurrentMap[string, *Proc]
 	engRouter         *gin.Engine
 	port              int
@@ -334,9 +322,19 @@ func (p *AppManage) login(c *gin.Context) {
 	info["user_type"] = "admin"
 	info["role"] = "super"
 	info["app_code"] = p.AppCode
+	info["ak"], info["sk"] = p.randUser()
 	resp["data"] = info
 	c.JSON(http.StatusOK, resp)
 	return
+}
+
+func (p *AppManage) randUser() (string, string) {
+	keys := make([]string, 0, len(p.SuperAuth))
+	for key := range p.SuperAuth {
+		keys = append(keys, key)
+	}
+	randomKey := keys[rand.IntN(len(keys))]
+	return randomKey, p.SuperAuth[randomKey]
 }
 
 /************* 中间件 *************/
@@ -363,6 +361,10 @@ func (p *AppManage) cors() gin.HandlerFunc {
 func (p *AppManage) httpBasicAuth(authFunc func(user, password string, dt int64, mySecret []string) (bool, error, string)) gin.HandlerFunc {
 	realm := "Basic realm=" + strconv.Quote("")
 	return func(c *gin.Context) {
+		if _, ok := p.whitelist[c.Request.URL.Path]; ok {
+			c.Next() // 在白名单内，跳过校验
+			return
+		}
 		auth := c.GetHeader("Authorization")
 		if auth == "" {
 			c.Header("WWW-Authenticate", realm)
@@ -561,12 +563,15 @@ func (p *AppManage) GetPSInfo(processTop int) map[string]any {
 /*********************** 主方法 *****************/
 
 // Manage 主入口服务
-func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, https bool, dir string, middleware ...gin.HandlerFunc) {
+func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, https bool, dir string, whitelist map[string]bool, middleware ...gin.HandlerFunc) {
 	p.engRouter.Use(p.cors())
 	p.engRouter.Use(middleware...)
 	if p.Debug {
 		pprof.Register(p.engRouter)
 		p.engRouter.GET("/debug/vars", expvar.Handler())
+	}
+	if whitelist != nil {
+		p.whitelist = whitelist
 	}
 	for loc, fs := range fss {
 		_, err := fs.ReadFile("index.html")
