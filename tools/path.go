@@ -33,14 +33,12 @@ func CreateDir(dir string) error {
 	}
 	if isExist {
 		return nil
-	} else {
-		err = os.MkdirAll(dir, os.ModePerm)
-		if err != nil {
-			return err
-		} else {
-			return nil
-		}
 	}
+	err = os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func CopyFile(dstName string, srcName string) error {
