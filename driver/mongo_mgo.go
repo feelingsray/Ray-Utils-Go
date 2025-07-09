@@ -15,27 +15,27 @@ type MongoStore struct {
 	Session   *mgo.Session
 }
 
-func NewMongoStore(host []string, username string, password string) *MongoStore {
+func NewMongoStore(host []string, username, password string, timeout int) *MongoStore {
 	m := MongoStore{
 		Host:      host,
 		User:      username,
 		Pwd:       password,
-		PoolLimit: 4096,
-		Timeout:   20 * time.Second,
-		Session:   nil,
+		PoolLimit: 2048,
+		Timeout:   time.Duration(timeout) * time.Second,
 	}
 	return &m
 }
 
-func (m *MongoStore) GetSession() error {
+func (m *MongoStore) GetSession(direct, fastFail bool) error {
 	dialInfo := mgo.DialInfo{}
 	dialInfo.Addrs = m.Host
-	dialInfo.Direct = false
+	dialInfo.Direct = direct
 	dialInfo.Username = m.User
 	dialInfo.Password = m.Pwd
 	dialInfo.PoolLimit = m.PoolLimit
 	dialInfo.Timeout = m.Timeout
 	dialInfo.Source = "admin"
+	dialInfo.FailFast = fastFail
 	session, err := mgo.DialWithInfo(&dialInfo)
 	if err != nil {
 		return err
@@ -46,9 +46,9 @@ func (m *MongoStore) GetSession() error {
 	return nil
 }
 
-func (m *MongoStore) DBStore(dbname string) (*mgo.Database, error) {
+func (m *MongoStore) DBStore(dbname string, direct, fastFail bool) (*mgo.Database, error) {
 	if m.Session == nil {
-		err := m.GetSession()
+		err := m.GetSession(direct, fastFail)
 		if err != nil {
 			return nil, err
 		}
