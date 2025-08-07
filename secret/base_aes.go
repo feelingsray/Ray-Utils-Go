@@ -19,6 +19,35 @@ func NewAES() *AESCrypt {
 	return sc
 }
 
+func (a *AESCrypt) fEncrypt(data string) (string, error) {
+	// var block cipher.Block
+	block, err := aes.NewCipher(a.key)
+	if err != nil {
+		return "", err
+	}
+	encrypt := cipher.NewCBCEncrypter(block, a.iv)
+	source := PKCS5Padding([]byte(data), block.BlockSize())
+	dst := make([]byte, len(source))
+	encrypt.CryptBlocks(dst, source)
+	return base64.StdEncoding.EncodeToString(dst), nil
+}
+
+func (a *AESCrypt) fDecrypt(data string) (string, error) {
+	// var block cipher.Block
+	block, err := aes.NewCipher(a.key)
+	if err != nil {
+		return "", err
+	}
+	encrypt := cipher.NewCBCDecrypter(block, a.iv)
+	var source []byte
+	if source, err = base64.StdEncoding.DecodeString(data); err != nil {
+		return "", err
+	}
+	dst := make([]byte, len(source))
+	encrypt.CryptBlocks(dst, source)
+	return string(PKCS5UnPadding(dst)), nil
+}
+
 func (a *AESCrypt) encrypt(data string) (string, error) {
 	// var block cipher.Block
 	block, err := aes.NewCipher(a.key)
