@@ -53,6 +53,8 @@ func (s *Crypt) Decrypt(raw, mode string) (string, error) {
 		return s.aes.decrypt(raw)
 	case "sm2":
 		return s.sm2.decrypt(raw)
+	case "faes":
+		return s.aes.fDecrypt(raw)
 	}
 	return "", errors.New("crypt mode error")
 }
@@ -63,6 +65,9 @@ func (s *Crypt) Encrypt(raw, mode string) (string, error) {
 		return s.aes.encrypt(raw)
 	case "sm2":
 		return s.sm2.encrypt(raw)
+	case "faes":
+		return s.aes.fEncrypt(raw)
+
 	}
 	return "", nil
 }
