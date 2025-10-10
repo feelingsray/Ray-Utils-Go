@@ -406,11 +406,15 @@ func (p *AppManage) basicAuth(username, pwd string, dt int64, mySecret []string)
 		}
 	}
 	if (username == "otp" || username == "OTP") && (dt > 0) {
-		ok, key := rotp.RTOTPVerifyWithTime(pwd, time.Unix(dt, 0), mySecret)
-		if ok {
-			return true, nil, key
+		resKey := ""
+		for i := 0; i < 20; i++ {
+			ok, key := rotp.RTOTPVerifyWithTime(pwd, time.Unix(dt-int64(i*30), 0), mySecret)
+			if ok {
+				return true, nil, key
+			}
+			resKey = key
 		}
-		return false, errors.New("动态OTP密码错误"), key
+		return false, errors.New("动态OTP密码错误"), resKey
 	}
 	return false, errors.New("用户非OTP用户或Super用户"), ""
 }
