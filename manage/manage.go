@@ -563,15 +563,12 @@ func (p *AppManage) GetPSInfo(processTop int) map[string]any {
 /*********************** 主方法 *****************/
 
 // Manage 主入口服务
-func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, https bool, dir string, whitelist map[string]bool, middleware ...gin.HandlerFunc) {
+func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, https bool, dir string, auth gin.HandlerFunc, middleware ...gin.HandlerFunc) {
 	p.engRouter.Use(p.cors())
 	p.engRouter.Use(middleware...)
 	if p.Debug {
 		pprof.Register(p.engRouter)
 		p.engRouter.GET("/debug/vars", expvar.Handler())
-	}
-	if whitelist != nil {
-		p.whitelist = whitelist
 	}
 	for loc, fs := range fss {
 		_, err := fs.ReadFile("index.html")
@@ -609,6 +606,7 @@ func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, http
 	})
 	feApi := p.engRouter.Group("/fe")
 	mapi := p.engRouter.Group("/mapi")
+	mapi.Use(auth)
 	mapi.GET("/version", func(c *gin.Context) {
 		mapiVersion := make(map[string]any)
 		mapiVersion["version"] = p.ManageInfo.Version
@@ -635,8 +633,6 @@ func (p *AppManage) Manage(version map[string]any, fss map[string]embed.FS, http
 	})
 	// 公共登录接口
 	mapi.POST("/login", p.login)
-	// 登录加密
-	// mapi.Use(p.httpBasicAuth(p.basicAuth))
 	mapi.GET("/proc/list", p.getProcListApi)
 	// 注入外部ManageAPI接口
 	p.registerManageApi(mapi)
