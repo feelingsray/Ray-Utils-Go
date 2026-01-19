@@ -24,12 +24,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ivanlebron/ledisdb/config"
 	"github.com/ivanlebron/ledisdb/ledis"
-	"github.com/orcaman/concurrent-map/v2"
+	cmap "github.com/orcaman/concurrent-map/v2"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/load"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/process"
+	mcp "trpc.group/trpc-go/trpc-mcp-go"
 
 	"github.com/feelingsray/ray-utils-go/v2/rotp"
 	"github.com/feelingsray/ray-utils-go/v2/serialize"
@@ -68,6 +69,7 @@ func NewAppManage(ctx context.Context, appCode string, port int, mApi RegisterMa
 	}
 	manage.port = port
 	manage.procStore = cmap.New[*Proc]()
+	manage.mcpStore = cmap.New[*MCPServer]()
 	if debug {
 		gin.SetMode(gin.DebugMode)
 	} else {
@@ -128,6 +130,11 @@ type AMInfo struct {
 	Author    []string
 }
 
+type MCPServer struct {
+	Name   string
+	Server *mcp.Server
+}
+
 type AppManage struct {
 	// public field
 	AppCode string
@@ -142,6 +149,7 @@ type AppManage struct {
 	firstRun          bool
 	whitelist         map[string]bool
 	procStore         cmap.ConcurrentMap[string, *Proc]
+	mcpStore          cmap.ConcurrentMap[string, *MCPServer]
 	engRouter         *gin.Engine
 	port              int
 	registerManageApi RegisterManageApi
@@ -168,6 +176,41 @@ func (p *AppManage) RegisterProc(code, name string) error {
 // ClearAllProc 删除所有内部服务
 func (p *AppManage) ClearAllProc() {
 	p.procStore.Clear()
+}
+
+func (p *AppManage) RegisterMCPServer(name, version string, options ...mcp.ServerOption) (*mcp.Server, error) {
+	if name == "" {
+		return nil, errors.New("mcp server name is empty")
+	}
+	s := mcp.NewServer(name, version, options...)
+	server := &MCPServer{
+		Name:   name,
+		Server: s,
+	}
+	p.mcpStore.Set(name, server)
+
+	prefix := "/mcp/" + name
+	handler := s.HTTPHandler()
+	p.engRouter.Any(prefix+"/*path", gin.WrapH(http.StripPrefix(prefix, handler)))
+	p.engRouter.Any(prefix, gin.WrapH(http.StripPrefix(prefix, handler)))
+
+	return s, nil
+}
+
+func (p *AppManage) GetMCPServer(name string) (*mcp.Server, bool) {
+	server, ok := p.mcpStore.Get(name)
+	if !ok {
+		return nil, false
+	}
+	return server.Server, true
+}
+
+func (p *AppManage) ListMCPServers() map[string]*MCPServer {
+	result := make(map[string]*MCPServer)
+	for key, value := range p.mcpStore.Items() {
+		result[key] = value
+	}
+	return result
 }
 
 // SetProcStatus 设置内部服务状态
