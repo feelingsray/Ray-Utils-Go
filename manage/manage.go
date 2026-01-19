@@ -131,8 +131,8 @@ type AMInfo struct {
 }
 
 type MCPServer struct {
-	Name   string
-	Server *mcp.Server
+	Name      string
+	SSEServer *mcp.SSEServer
 }
 
 type AppManage struct {
@@ -178,31 +178,43 @@ func (p *AppManage) ClearAllProc() {
 	p.procStore.Clear()
 }
 
-func (p *AppManage) RegisterMCPServer(name, version string, options ...mcp.ServerOption) (*mcp.Server, error) {
+func (p *AppManage) RegisterMCPServer(name, version string, port int, options ...mcp.SSEOption) (*mcp.SSEServer, error) {
 	if name == "" {
 		return nil, errors.New("mcp server name is empty")
 	}
-	s := mcp.NewServer(name, version, options...)
-	server := &MCPServer{
-		Name:   name,
-		Server: s,
-	}
-	p.mcpStore.Set(name, server)
 
-	prefix := "/mcp/" + name
-	handler := s.HTTPHandler()
-	p.engRouter.Any(prefix+"/*path", gin.WrapH(http.StripPrefix(prefix, handler)))
-	p.engRouter.Any(prefix, gin.WrapH(http.StripPrefix(prefix, handler)))
+	addr := fmt.Sprintf(":%d", port)
+
+	// Use WithHTTPServer option
+	options = append(options, mcp.WithSSEEndpoint("/sse"))
+	options = append(options, mcp.WithMessageEndpoint("/message"))
+
+	s := mcp.NewSSEServer(name, version, options...)
+
+	// IMPORTANT: Set the handler to the SSEServer itself
+
+	mcpServer := &MCPServer{
+		Name:      name,
+		SSEServer: s,
+	}
+	p.mcpStore.Set(name, mcpServer)
+
+	// Start server in background
+	go func() {
+		if err := s.Start(addr); err != nil {
+			panic(err)
+		}
+	}()
 
 	return s, nil
 }
 
-func (p *AppManage) GetMCPServer(name string) (*mcp.Server, bool) {
+func (p *AppManage) GetMCPServer(name string) (*mcp.SSEServer, bool) {
 	server, ok := p.mcpStore.Get(name)
 	if !ok {
 		return nil, false
 	}
-	return server.Server, true
+	return server.SSEServer, true
 }
 
 func (p *AppManage) ListMCPServers() map[string]*MCPServer {
@@ -354,7 +366,7 @@ func (p *AppManage) login(c *gin.Context) {
 	}
 	if !ok {
 		resp["code"] = http.StatusUnauthorized
-		resp["msg"] = fmt.Sprintf("登录失败:用户名或密码不正确")
+		resp["msg"] = "用户名或密码不正确"
 		c.JSON(http.StatusUnauthorized, resp)
 		return
 	}
