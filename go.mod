@@ -1,25 +1,34 @@
 module github.com/feelingsray/ray-utils-go/v2
 
-go 1.25
+go 1.25.1
 
 require (
+	github.com/danomagnum/gologix v0.44.0-beta
+	github.com/future-architect/go-mcprotocol v0.0.0-20210518065132-abfb4ef2fb9b
 	github.com/gin-contrib/expvar v1.0.1
 	github.com/gin-contrib/pprof v1.4.0
 	github.com/gin-gonic/gin v1.9.1
+	github.com/go-ole/go-ole v1.2.6
 	github.com/goccy/go-json v0.10.3
+	github.com/gopcua/opcua v0.9.1
+	github.com/huskar-t/opcda v0.4.1
 	github.com/ivanlebron/gmsm v1.0.0
 	github.com/ivanlebron/ledisdb v1.0.0
+	github.com/ivanlebron/modbus v1.0.3
+	github.com/iwanlebron/gofins v0.0.0-20251017091241-ecbbecf7e782
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/minio/minio-go/v7 v7.0.61
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/redis/go-redis/v9 v9.14.1
+	github.com/robinson/gos7 v0.0.0-20260924061028-c54e650665ba
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/shirou/gopsutil/v3 v3.24.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cast v1.6.0
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 	github.com/xlzd/gotp v0.1.0
 	go.mongodb.org/mongo-driver v1.14.0
+	golang.org/x/sys v0.38.0
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/yaml.v2 v2.4.0
 	trpc.group/trpc-go/trpc-mcp-go v0.0.12
@@ -38,12 +47,12 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/getkin/kin-openapi v0.131.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.19.0 // indirect
+	github.com/goburrow/serial v0.1.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jonboulle/clockwork v0.3.0 // indirect
@@ -62,6 +71,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
+	github.com/npat-efault/crc16 v0.0.0-20161013170008-4128ccbe47c3 // indirect
 	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
 	github.com/onsi/gomega v1.18.1 // indirect
@@ -92,7 +102,6 @@ require (
 	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/sync v0.18.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
