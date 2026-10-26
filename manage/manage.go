@@ -18,6 +18,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-contrib/expvar"
@@ -148,6 +149,8 @@ type AppManage struct {
 	Ctx        context.Context
 
 	// privacy field
+	loginMu           sync.Mutex
+	loginFailures     map[string]loginFailure
 	firstRun          bool
 	whitelist         map[string]bool
 	procStore         cmap.ConcurrentMap[string, *Proc]
@@ -340,6 +343,51 @@ func (p *AppManage) getProcListApi(c *gin.Context) {
 }
 
 /************* 接口 ***************/
+const loginFailureLimit = 5
+const loginLockDuration = 10 * time.Minute
+
+var errLoginLocked = errors.New("登录失败达到5次，账号锁定10分钟")
+
+type loginFailure struct {
+	count   int
+	expires time.Time
+}
+
+func (p *AppManage) loginAuth(username, password string, now time.Time) (bool, error, string) {
+	p.loginMu.Lock()
+	defer p.loginMu.Unlock()
+
+	identity := "unknown"
+	if _, ok := p.SuperAuth[username]; ok {
+		identity = "user:" + username
+	}
+	if username == "otp" || username == "OTP" {
+		identity = "otp"
+	}
+	if p.loginFailures == nil {
+		p.loginFailures = make(map[string]loginFailure)
+	}
+	failure := p.loginFailures[identity]
+	if !now.Before(failure.expires) {
+		failure = loginFailure{}
+	}
+	if failure.count >= loginFailureLimit {
+		return false, errLoginLocked, ""
+	}
+	ok, err, key := p.basicAuth(username, password, now.Unix(), nil)
+	if ok && err == nil {
+		delete(p.loginFailures, identity)
+		return true, nil, key
+	}
+	failure.count++
+	failure.expires = now.Add(loginLockDuration)
+	p.loginFailures[identity] = failure
+	if failure.count >= loginFailureLimit {
+		return false, errLoginLocked, ""
+	}
+	return false, err, key
+}
+
 func (p *AppManage) login(c *gin.Context) {
 	resp := make(map[string]any)
 	req := make(map[string]string)
@@ -352,25 +400,24 @@ func (p *AppManage) login(c *gin.Context) {
 	username, un := req["username"]
 	password, pwd := req["password"]
 	timestamp, dt := req["timestamp"]
-	mySecret, myS := req["secret"]
 	if (!un) || (!pwd) || (!dt) {
 		resp["code"] = http.StatusInternalServerError
 		resp["msg"] = "用户名、密码或客户端时间未传值"
 		c.JSON(http.StatusInternalServerError, resp)
 		return
 	}
-	tt, err := strconv.Atoi(timestamp)
+	_, err := strconv.Atoi(timestamp)
 	if err != nil {
 		resp["code"] = http.StatusInternalServerError
 		resp["msg"] = "非法的时间戳"
 		c.JSON(http.StatusInternalServerError, resp)
 		return
 	}
-	mySecretList := make([]string, 0)
-	if myS {
-		mySecretList = append(mySecretList, mySecret)
+	ok, err, key := p.loginAuth(username, password, time.Now())
+	if errors.Is(err, errLoginLocked) {
+		c.JSON(http.StatusTooManyRequests, gin.H{"code": http.StatusTooManyRequests, "msg": err.Error()})
+		return
 	}
-	ok, err, key := p.basicAuth(username, password, int64(tt), mySecretList)
 	if err != nil {
 		resp["code"] = http.StatusInternalServerError
 		resp["msg"] = fmt.Sprintf("登录失败:%s", err.Error())
@@ -475,7 +522,7 @@ func (p *AppManage) basicAuth(username, pwd string, dt int64, mySecret []string)
 	}
 	if (username == "otp" || username == "OTP") && (dt > 0) {
 		resKey := ""
-		for i := 0; i < 20; i++ {
+		for i := 0; i < 2; i++ {
 			ok, key := rotp.RTOTPVerifyWithTime(pwd, time.Unix(dt-int64(i*30), 0), mySecret)
 			if ok {
 				return true, nil, key
